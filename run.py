@@ -1,0 +1,64 @@
+from datetime import datetime
+import os
+import sys
+import json
+import logging
+
+from utils import get_train_test, create_folder
+from logging_utils import config_logger
+from run_utils import fit, score, read_data, MODEL_DICT
+
+logger = logging.getLogger(__name__)
+config_logger(logger)
+
+PROC_NAME = 'skrun'
+
+def create_folder_structure():
+    root = sys.argv[1]
+    matrix_path = os.path.join(root, 'matrix')
+    create_folder(root)
+    create_folder(matrix_path)
+    config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    with open(os.path.join(root, 'vars.json'), 'w', encoding='utf-8') as file:
+        json.dump(config, file)
+
+    return root, matrix_path
+
+
+if __name__ == '__main__':
+
+    with open('vars.json', 'r', encoding='utf-8') as file:
+        config = json.load(file)
+
+    root, matrix_path =  create_folder_structure()
+
+    df, categories = read_data()
+    
+    df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'], 24 // 3, 24)
+    X_train, y_train = df_train[lag_cols], df_train[lead_cols]
+    X_test, y_test = df_test[lag_cols], df_test[lead_cols]
+
+        
+    model_name_param = sys.argv[2] if len(sys.argv) > 2 else None
+
+    for model_name, _ in MODEL_DICT.items():
+        if model_name_param is not None and model_name_param != model_name:
+            continue
+
+        logger.info(f'Fitting model, {model_name}')
+        model = fit(model_name, config['init_params'][model_name], X_train, y_train)
+
+        logger.info(f'Scoring model, {model_name}')
+        score(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
+            
+
+
+
+
+
+
+        
+
+
+
+

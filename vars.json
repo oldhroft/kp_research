@@ -1,0 +1,20 @@
+{
+    "init_params": {
+        "xgboost": {
+            "random_state": 17, 
+            "n_jobs": -1
+        },
+        "randomforest": {
+            "random_state": 17, 
+            "n_jobs": -1
+        },
+        "ridge": {
+            "ridgeclassifier__random_state": 17
+        }
+    },
+    "variables": [
+        "Kp*10", "Dst", "B_x", "B_gsm_y", "B_gsm_z", 
+        "B_magn", "SW_spd", "H_den_SWP", "doySin", "hourSin",
+        "doyCos", "hourCos"
+    ]
+}
