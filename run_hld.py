@@ -7,7 +7,7 @@ import logging
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 from utils import get_train_test, create_folder, validate
-from logging_utils import config_logger
+from logging_utils import config_logger, create_argparser
 from run_utils import fit, score, read_data, MODEL_DICT
 
 logger = logging.getLogger(__name__)
@@ -15,8 +15,7 @@ config_logger(logger)
 
 PROC_NAME = 'skrunhld'
 
-def create_folder_structure():
-    root = sys.argv[1]
+def create_folder_structure(root):
     matrix_path = os.path.join(root, 'matrix')
     create_folder(root)
     create_folder(matrix_path)
@@ -25,10 +24,12 @@ def create_folder_structure():
 
 if __name__ == '__main__':
 
+    arguments = create_argparser().parse_args()
+
     with open('vars_hld.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    root, matrix_path =  create_folder_structure()
+    root, matrix_path =  create_folder_structure(arguments.folder)
     config['best_params'] = {}
 
     df, categories = read_data()
@@ -42,11 +43,9 @@ if __name__ == '__main__':
                                                                   24 // 3, 24,)
     X_train_full, y_train_full = df_test[lag_cols], df_test[lead_cols]
     X_test, y_test = df_test[lag_cols], df_test[lead_cols]
-        
-    model_name_param = sys.argv[2] if len(sys.argv) > 2 else None
 
     for model_name, model in MODEL_DICT.items():
-        if model_name_param is not None and model_name_param != model_name:
+        if arguments.model is not None and arguments.model != model_name:
             continue
 
         logger.info(f'Grid search model, {model_name}')
