@@ -47,6 +47,8 @@ if __name__ == '__main__':
     for model_name, model in MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:
             continue
+        if not arguments.dummy and model_name == 'dummy':
+            continue
 
         logger.info(f'Grid search model, {model_name}')
         model = model.set_params(**config['init_params'][model_name])

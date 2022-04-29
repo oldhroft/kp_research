@@ -19,9 +19,6 @@ def create_folder_structure(root):
     matrix_path = os.path.join(root, 'matrix')
     create_folder(root)
     create_folder(matrix_path)
-    config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
-    with open(os.path.join(root, 'vars_cv.json'), 'w', encoding='utf-8') as file:
-        json.dump(config, file)
 
     return root, matrix_path
 
@@ -50,9 +47,11 @@ if __name__ == '__main__':
     X_train, y_train = df_train[lag_cols], df_train[lead_cols[0]]
     y_train_full = df_train[lead_cols]
     X_test, y_test = df_test[lag_cols], df_test[lead_cols]
-
+    config['best_params'] = {}
     for model_name, _ in MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:
+            continue
+        if not arguments.dummy and model_name == 'dummy':
             continue
 
         logger.info(f'Grid search model, {model_name}')
@@ -61,6 +60,7 @@ if __name__ == '__main__':
                                           config['init_params'][model_name],
                                           X_train, y_train, config['cv_params'],
                                           config['gcv_params'])
+        config['best_params'][model_name] = best_params
         logger.info(f'Best params: {best_params}')
 
         logger.info(f'Fitting model, {model_name}')
@@ -68,6 +68,10 @@ if __name__ == '__main__':
 
         logger.info(f'Scoring model, {model_name}')
         score(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
+    
+    config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    with open(os.path.join(root, 'vars_cv.json'), 'w', encoding='utf-8') as file:
+        json.dump(config, file)
 
 
             

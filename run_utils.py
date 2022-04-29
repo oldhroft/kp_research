@@ -8,6 +8,7 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import f1_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.dummy import DummyClassifier
 
 from preprocess import categorize, preprocess_3h
 from utils import columnwise_score, columnwise_confusion_matrix
@@ -16,6 +17,7 @@ MODEL_DICT = {
     'xgboost': XGBClassifier(),
     'randomforest': RandomForestClassifier(),
     'ridge': make_pipeline(StandardScaler(), RidgeClassifier()),
+    'dummy': DummyClassifier(strategy='most_frequent')
 }
 
 def read_data():

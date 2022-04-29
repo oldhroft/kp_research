@@ -46,6 +46,8 @@ if __name__ == '__main__':
     for model_name, _ in MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:
             continue
+        if not arguments.dummy and model_name == 'dummy':
+            continue        
 
         logger.info(f'Fitting model, {model_name}')
         model = fit(model_name, config['init_params'][model_name], X_train, y_train)
