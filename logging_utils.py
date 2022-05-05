@@ -1,18 +1,31 @@
 import logging
 import sys
 
-from numpy import imag
+import datetime
+import os
 
-def config_logger(logger):
+from utils import create_folder
+
+def config_logger(logger, proc_name: str, folder: str):
+
     handler = logging.StreamHandler(sys.stdout)
+
+    log_folder = os.path.join(folder, f'log_{proc_name}')
+    create_folder(log_folder)
+    now = datetime.datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    filename = os.path.join(log_folder, f'log_{now}.log')
+    file_handler = logging.FileHandler(filename, mode='w', encoding='utf-8')
     
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
     logger.addHandler(handler)
+    logger.addHandler(file_handler)
 
     logger.setLevel(logging.INFO)
 
 from argparse import ArgumentParser
+
 def create_argparser() -> ArgumentParser:
     parser = ArgumentParser()
 

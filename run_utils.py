@@ -20,9 +20,9 @@ except ImportError:
 
 from pandas import get_dummies
 
-from .preprocess import categorize, preprocess_3h
-from .utils import columnwise_score, columnwise_confusion_matrix
-from .utils_nn import get_sequential_model
+from preprocess import categorize, preprocess_3h
+from utils import columnwise_score, columnwise_confusion_matrix
+from utils_nn import get_sequential_model
 
 MODEL_DICT = {
     'xgboost': XGBClassifier(),

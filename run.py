@@ -4,23 +4,16 @@ import sys
 import json
 import logging
 
-from .utils import get_train_test, create_folder
-from .logging_utils import config_logger, create_argparser
-from .run_utils import fit_keras, score, read_data, MODEL_DICT, f
-
-logger = logging.getLogger(__name__)
-config_logger(logger)
+from utils import get_train_test, create_folder
+from logging_utils import config_logger, create_argparser
+from run_utils import fit_keras, score, read_data, MODEL_DICT, fit
 
 PROC_NAME = 'skrun'
 
-def create_folder_structure():
-    root = sys.argv[1]
+def create_folder_structure(root):
     matrix_path = os.path.join(root, 'matrix')
     create_folder(root)
     create_folder(matrix_path)
-    config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
-    with open(os.path.join(root, 'vars.json'), 'w', encoding='utf-8') as file:
-        json.dump(config, file)
 
     return root, matrix_path
 
@@ -28,11 +21,13 @@ def create_folder_structure():
 if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
+    root, matrix_path = create_folder_structure(arguments.folder)
+
+    logger = logging.getLogger(__name__)
+    config_logger(logger, PROC_NAME, arguments.folder)
 
     with open('vars.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
-
-    root, matrix_path = create_folder_structure(arguments.folder)
 
     df, categories = read_data()
     
@@ -54,6 +49,10 @@ if __name__ == '__main__':
 
         logger.info(f'Scoring model, {model_name}')
         score(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
+
+    config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    with open(os.path.join(root, 'vars.json'), 'w', encoding='utf-8') as file:
+        json.dump(config, file)
             
 
 

@@ -6,12 +6,9 @@ import logging
 
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
-from .utils import get_train_test, create_folder, validate
-from .logging_utils import config_logger, create_argparser
-from .run_utils import fit, score, read_data, MODEL_DICT
-
-logger = logging.getLogger(__name__)
-config_logger(logger)
+from utils import get_train_test, create_folder, validate
+from logging_utils import config_logger, create_argparser
+from run_utils import fit, score, read_data, MODEL_DICT
 
 PROC_NAME = 'skrunhld'
 
@@ -25,11 +22,14 @@ def create_folder_structure(root):
 if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
+    root, matrix_path = create_folder_structure(arguments.folder)
+
+    logger = logging.getLogger(__name__)
+    config_logger(logger, PROC_NAME, arguments.folder)
 
     with open('vars_hld.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    root, matrix_path =  create_folder_structure(arguments.folder)
     config['best_params'] = {}
 
     df, categories = read_data()
