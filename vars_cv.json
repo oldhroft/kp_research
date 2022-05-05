@@ -28,7 +28,7 @@
     "cv_params": {
         "shuffle": false,
         "n_splits": 5,
-        "random_state": 17
+        "random_state": null
     },
     "variables": [
         "Kp*10", "Dst", "B_x", "B_gsm_y", "B_gsm_z", 

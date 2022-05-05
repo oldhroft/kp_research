@@ -1,0 +1,48 @@
+{
+    "init_params": {
+        "perceptron" : {
+            "optimizer": "adam"
+        }
+    },
+    "grid_params": {
+        "perceptron": {
+            "units_array": [
+                [16], [32],
+                [64], [128],
+                [16, 8], [32, 16], [64, 32], [128, 64],
+                [16, 8, 4], [32, 16, 8], [64, 32, 16], [128, 64, 32]
+            ]
+        }
+    },
+    "scoring_params": {
+        "average": "macro"
+    },
+    "seed": 16,
+    "variables": [
+        "Kp*10", "Dst", "B_x", "B_gsm_y", "B_gsm_z", 
+        "B_magn", "SW_spd", "H_den_SWP", "doySin", "hourSin",
+        "doyCos", "hourCos"
+    ],
+    "fit_params": {
+        "perceptron": {
+            "validation_split": 0.1,
+            "epochs":  6
+        }
+    },
+    "callback_params": {
+        "perceptron": {
+            "monitor": "val_loss", 
+            "restore_best_weights": true,
+            "patience": 10
+        }
+    },
+    "cv_params": {
+        "shuffle": false,
+        "n_splits": 5,
+        "random_state": null
+    },
+    "gcv_params": {
+        "verbose": 1,
+        "seed": 17
+    }
+}

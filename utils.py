@@ -114,9 +114,7 @@ def get_train_test(df: DataFrame, columns: list,
             df_test.reset_index(), lead_cols)
 
 
-from sklearn.metrics import multilabel_confusion_matrix, confusion_matrix
-from sklearn.metrics import f1_score
-
+from sklearn.metrics import confusion_matrix
 from types import FunctionType
 
 def columnwise_score(scoring_func: FunctionType, 
@@ -158,7 +156,7 @@ def _create_param_grid(params: dict) -> map:
 def validate(model, params: list,
              X_train: DataFrame, y_train: Series,
              X_val: DataFrame, y_val: Series,
-             scoring: str, verbose: int=1, ) -> list:
+             scoring: str, verbose: int=1,) -> list:
     
     best_score = 0
     best_param = None
@@ -182,58 +180,58 @@ def validate(model, params: list,
 
     return best_score, best_param
 
+from pandas import Series, DataFrame
 from pandas import get_dummies
+from numpy import mean
+from sklearn.model_selection import StratifiedKFold
+from tensorflow.keras import callbacks as callbacks
+try:
+    from tensorflow.random import set_seed
+except ImportError:
+    from tensorflow import random as random
+    set_seed = random.set_seed
 
-def validate_keras_cv(model: FunctionType, get_callbacks: FunctionType, shape: tuple,
-                      cv, params: list, param_name: str, scoring: FunctionType,
+def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
+                      cv_params: dict, params: dict, scoring: FunctionType,
                       X: DataFrame, y: Series,
-                      verbose: bool=True, seed: int=None,
-                      scoring_kwargs: dict={}, fit_kwargs: dict={}, 
-                      callback_kwargs: dict={}) -> list:
+                      callback_params: dict, scoring_params: dict,
+                      init_params: dict, fit_params: dict,
+                      verbose: bool, seed: int,) -> list:
     
-    scores = []
+    best_score = 0
+    best_param = None
 
     for param in _create_param_grid(params):
-
         start_time = time.time()
-        
         if seed is not None: set_seed(seed)
-        if verbose: print('Fitting param {} = {}'.format(param_name, param))
+        if verbose: print('Fitting param {}'.format(param))
+        full_params = init_params.copy()
+        full_params.update(param)
         sub_scores = []
+        cv = StratifiedKFold(**cv_params)
         for train_idx, test_idx in cv.split(X, y):
-            callbacks_ = get_callbacks(**callback_kwargs)
-            model_param = model(shape, **param)
+            callbacks_list = [
+                callbacks.EarlyStopping(**callback_params),
+            ]
+            
+            model_param = model(input_shape, n_classes, **full_params)
             X_train, y_train = X[train_idx], y[train_idx]
             X_test, y_test = X[test_idx], y[test_idx]
             y_train = get_dummies(y_train)
-            model_param.fit(X_train, y_train, callbacks=callbacks_,
-                            **fit_kwargs)
+            model_param.fit(X_train, y_train.values, callbacks=callbacks_list,
+                            **fit_params)
             y_preds = model_param.predict(X_test).argmax(axis=1)
-            sub_scores.append(scoring(y_preds, y_test, **scoring_kwargs))
+            sub_scores.append(scoring(y_preds, y_test, **scoring_params))
         
-        scores.append(sub_scores)
+        score = mean(sub_scores)
+
+        if score > best_score:
+            best_score = score
+            best_param = param
    
         end_time = time.time()
-        if verbose: print('Param {} = {}, time {:.2f}'.format(param_name, 
-                                                              param, 
-                                                              end_time - start_time))
+        if verbose: print('Param {}, time {:.2f}'.format(param, 
+                                                         end_time - start_time))
 
-from seaborn import heatmap
-from matplotlib.pyplot import subplots, tight_layout
-
-def plot_all_confusion_matrices(matrices: list, 
-                                h: int=2, w: int= 2, **kwargs) -> None:
-
-    n = len(matrices)
-
-    f, ax = subplots(n, 1, sharex=True)
-
-    for i, (key, matrix) in enumerate(matrices.items()):
-        heatmap(matrix.astype('int'), ax=ax[i], **kwargs)
-        ax[i].set_title(key)
-
-    f.set_figheight(n * h)
-    f.set_figwidth(w)
-
-    tight_layout()
+    return best_param, best_score
 

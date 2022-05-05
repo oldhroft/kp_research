@@ -15,3 +15,5 @@ def get_sequential_model(input_shape: tuple, n_classes: int=3, units_array: list
     model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
     return model
+
+        

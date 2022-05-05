@@ -5,3 +5,4 @@
 __pycache__
 *.log
 *.tsv
+test_run
