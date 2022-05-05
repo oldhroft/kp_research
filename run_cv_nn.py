@@ -81,7 +81,7 @@ if __name__ == '__main__':
     
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
     with open(os.path.join(root, 'vars_cv_nn.json'), 'w', encoding='utf-8') as file:
-        json.dump(config, file)
+        json.dump(config, file, indent=4)
 
 
             
