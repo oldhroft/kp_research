@@ -1,0 +1,27 @@
+{
+    "init_params": {
+        "perceptron" : {
+            "units_array": [10, 10],
+            "optimizer": "adam"
+        }
+    },
+    "seed": 16,
+    "variables": [
+        "Kp*10", "Dst", "B_x", "B_gsm_y", "B_gsm_z", 
+        "B_magn", "SW_spd", "H_den_SWP", "doySin", "hourSin",
+        "doyCos", "hourCos"
+    ],
+    "fit_params": {
+        "perceptron": {
+            "validation_split": 0.1,
+            "epochs":  6
+        }
+    },
+    "callback_params": {
+        "perceptron": {
+            "monitor": "val_loss", 
+            "restore_best_weights": true,
+            "patience": 10
+        }
+    }
+}
