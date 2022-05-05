@@ -92,7 +92,7 @@ def get_train_test(df: DataFrame, columns: list,
     if last_val is not None:
         ts_df_back_val = ts_df_back_train.last(last_val)
         index_val = ts_df_back_val.index
-        ts_df_back_train = ts_df_back.set_index('dttm').drop(index_val)
+        ts_df_back_train = ts_df_back_train.drop(index_val)
         df_val, lead_cols = add_lags(ts_df_back_val, lags=forward_steps,
                                        forward=True, trim=True, 
                                        subset='category', return_cols=True)

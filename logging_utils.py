@@ -6,6 +6,22 @@ import os
 
 from utils import create_folder
 
+class StreamToLogger(object):
+    """
+    Fake file-like stream object that redirects writes to a logger instance.
+    """
+    def __init__(self, logger, level):
+       self.logger = logger
+       self.level = level
+       self.linebuf = ''
+
+    def write(self, buf):
+       for line in buf.rstrip().splitlines():
+          self.logger.log(self.level, line.rstrip())
+
+    def flush(self):
+        pass
+
 def config_logger(logger, proc_name: str, folder: str):
 
     handler = logging.StreamHandler(sys.stdout)
@@ -21,8 +37,10 @@ def config_logger(logger, proc_name: str, folder: str):
     file_handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.addHandler(file_handler)
-
     logger.setLevel(logging.INFO)
+
+    sys.stdout = StreamToLogger(logger, logging.INFO)
+    sys.stderr = StreamToLogger(logger, logging.ERROR)
 
 from argparse import ArgumentParser
 

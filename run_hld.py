@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'], 
                                                                   24 // 3, 24,)
-    X_train_full, y_train_full = df_test[lag_cols], df_test[lead_cols]
+    X_train_full, y_train_full = df_train[lag_cols], df_train[lead_cols]
     X_test, y_test = df_test[lag_cols], df_test[lead_cols]
 
     for model_name, model in MODEL_DICT.items():
