@@ -14,7 +14,8 @@
     "fit_params": {
         "perceptron": {
             "validation_split": 0.1,
-            "epochs":  6
+            "epochs":  6,
+            "verbose": 2
         }
     },
     "callback_params": {

@@ -34,6 +34,7 @@ if __name__ == '__main__':
     df, categories = read_data()
     
     df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'], 24 // 3, 24)
+    df_train = df_train.sample(frac=1., random_state=config['seed'])
     X_train, y_train = df_train[lag_cols], df_train[lead_cols]
     X_test, y_test = df_test[lag_cols], df_test[lead_cols]
 

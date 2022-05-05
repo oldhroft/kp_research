@@ -167,7 +167,6 @@ def validate(model, params: list,
 
         start_time = time.time()
         model_param = clone(model).set_params(**param)
-        if verbose > 0: print(model_param.get_params())
         if verbose > 0: print(f'Fitting param = {param}')
         model_param.fit(X_train, y_train)
         score = scorer(model_param, X_val, y_val)

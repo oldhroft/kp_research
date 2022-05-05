@@ -28,7 +28,7 @@ def config_logger(logger, proc_name: str, folder: str):
 
     log_folder = os.path.join(folder, f'log_{proc_name}')
     create_folder(log_folder)
-    now = datetime.datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     filename = os.path.join(log_folder, f'log_{now}.log')
     file_handler = logging.FileHandler(filename, mode='w', encoding='utf-8')
     

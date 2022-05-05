@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                            X_val, y_val, **config['gv_params'])
 
         logger.info(f'Best params: {best_params}')
-        logger.info(f'Best params: {best_score}')
+        logger.info(f'Best score: {best_score}')
         config['best_params'][model_name] = best_params
         params = config['init_params'][model_name].copy()
         params.update(best_params)

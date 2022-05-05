@@ -26,7 +26,8 @@
     "fit_params": {
         "perceptron": {
             "validation_split": 0.1,
-            "epochs":  6
+            "epochs":  6,
+            "verbose": 2
         }
     },
     "callback_params": {
@@ -44,5 +45,6 @@
     "gcv_params": {
         "verbose": 1,
         "seed": 17
-    }
+    },
+    "random_state": 17
 }
