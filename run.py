@@ -4,9 +4,9 @@ import sys
 import json
 import logging
 
-from utils import get_train_test, create_folder
-from logging_utils import config_logger, create_argparser
-from run_utils import fit_keras, score, read_data, MODEL_DICT, f
+from .utils import get_train_test, create_folder
+from .logging_utils import config_logger, create_argparser
+from .run_utils import fit_keras, score, read_data, MODEL_DICT, f
 
 logger = logging.getLogger(__name__)
 config_logger(logger)

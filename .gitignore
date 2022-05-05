@@ -6,3 +6,6 @@ __pycache__
 *.log
 *.tsv
 test_run
+*.ipynb
+.ipynb_checkpoints
+.pytest_cache

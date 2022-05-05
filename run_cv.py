@@ -5,9 +5,9 @@ import logging
 
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
-from utils import get_train_test, create_folder
-from logging_utils import config_logger, create_argparser
-from run_utils import fit, score, read_data, MODEL_DICT
+from .utils import get_train_test, create_folder
+from .logging_utils import config_logger, create_argparser
+from .run_utils import fit, score, read_data, MODEL_DICT
 
 logger = logging.getLogger(__name__)
 config_logger(logger)

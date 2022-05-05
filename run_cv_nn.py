@@ -6,9 +6,9 @@ from sklearn.metrics import f1_score
 
 from sklearn.preprocessing import StandardScaler
 
-from utils import get_train_test, create_folder, validate_keras_cv
-from logging_utils import config_logger, create_argparser
-from run_utils import fit_keras, score_keras, read_data, NN_MODEL_DICT
+from .utils import get_train_test, create_folder, validate_keras_cv
+from .logging_utils import config_logger, create_argparser
+from .run_utils import fit_keras, score_keras, read_data, NN_MODEL_DICT
 
 logger = logging.getLogger(__name__)
 config_logger(logger)

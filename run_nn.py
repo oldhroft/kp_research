@@ -6,9 +6,9 @@ import logging
 
 from sklearn.preprocessing import StandardScaler
 
-from utils import get_train_test, create_folder
-from logging_utils import config_logger, create_argparser
-from run_utils import fit_keras, score, read_data, NN_MODEL_DICT, score_keras
+from .utils import get_train_test, create_folder
+from .logging_utils import config_logger, create_argparser
+from .run_utils import fit_keras, score, read_data, NN_MODEL_DICT, score_keras
 
 logger = logging.getLogger(__name__)
 config_logger(logger)
