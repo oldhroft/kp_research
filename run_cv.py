@@ -5,8 +5,8 @@ import logging
 
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
-from utils import get_train_test, create_folder
-from logging_utils import config_logger, create_argparser
+from helpers.utils import get_train_test, create_folder
+from helpers.logging_utils import config_logger, create_argparser
 from run_utils import fit, score, read_data, MODEL_DICT
 
 PROC_NAME = 'skruncv'
@@ -24,7 +24,7 @@ def grid_search(params, model_name, init_params, X_train, y_train,
     skf = StratifiedKFold(**cv_params)
     gcv = GridSearchCV(model, params, cv=skf, **gcv_params)
     gcv.fit(X_train, y_train)
-    return gcv.best_estimator_.get_params(), gcv.best_params_
+    return gcv.best_params_, gcv.best_score_
 
 
 if __name__ == '__main__':
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
 
-    with open('vars_cv.json', 'r', encoding='utf-8') as file:
+    with open('vars/vars_cv.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
     df, categories = read_data()
@@ -45,6 +45,7 @@ if __name__ == '__main__':
     X_train, y_train = df_train[lag_cols], df_train[lead_cols[0]]
     y_train_full = df_train[lead_cols]
     X_test, y_test = df_test[lag_cols], df_test[lead_cols]
+
     config['best_params'] = {}
     for model_name, _ in MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:
@@ -53,13 +54,17 @@ if __name__ == '__main__':
             continue
 
         logger.info(f'Grid search model, {model_name}')
-        params, best_params = grid_search(config['param_grids'][model_name],
-                                          model_name,
-                                          config['init_params'][model_name],
-                                          X_train, y_train, config['cv_params'],
-                                          config['gcv_params'])
+        best_params, best_score = grid_search(config['param_grids'][model_name],
+                                              model_name,
+                                              config['init_params'][model_name],
+                                              X_train, y_train, config['cv_params'],
+                                              config['gcv_params'])
         config['best_params'][model_name] = best_params
+        params = config['init_params'][model_name].copy()
+        params.update(best_params)
         logger.info(f'Best params: {best_params}')
+        logger.info(f'Best score: {best_score}')
+
 
         logger.info(f'Fitting model, {model_name}')
         model = fit(model_name, params, X_train, y_train_full)

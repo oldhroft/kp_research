@@ -1,13 +1,13 @@
 from datetime import datetime
 import os
-import sys
 import json
 import logging
 
 from sklearn.preprocessing import StandardScaler
 
-from utils import get_train_test, create_folder
-from logging_utils import config_logger, create_argparser
+from helpers.utils import get_train_test, create_folder
+from helpers.logging_utils import config_logger, create_argparser
+
 from run_utils import fit_keras, score, read_data, NN_MODEL_DICT, score_keras
 
 PROC_NAME = 'nnrun'
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
 
-    with open('vars_nn.json', 'r', encoding='utf-8') as file:
+    with open('vars/vars_nn.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
         
     df, categories = read_data()

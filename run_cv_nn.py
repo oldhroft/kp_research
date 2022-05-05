@@ -6,8 +6,9 @@ from sklearn.metrics import f1_score
 
 from sklearn.preprocessing import StandardScaler
 
-from utils import get_train_test, create_folder, validate_keras_cv
-from logging_utils import config_logger, create_argparser
+from helpers.utils import get_train_test, create_folder, validate_keras_cv
+from helpers.logging_utils import config_logger, create_argparser
+
 from run_utils import fit_keras, score_keras, read_data, NN_MODEL_DICT
 
 PROC_NAME = 'nnruncv'
@@ -28,7 +29,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
 
-    with open('vars_cv_nn.json', 'r', encoding='utf-8') as file:
+    with open('vars/vars_cv_nn.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
     df, categories = read_data()
@@ -53,7 +54,7 @@ if __name__ == '__main__':
             continue
 
         logger.info(f'Grid search model, {model_name}')
-        best_params, best_scpre = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
+        best_params, best_score = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
                                                     len(categories), config['cv_params'],
                                                     config['grid_params'][model_name],
                                                     f1_score, X_train_scaled, y_train,
@@ -65,6 +66,7 @@ if __name__ == '__main__':
 
         config['best_params'][model_name] = best_params
         logger.info(f'Best params: {best_params}')
+        logger.info(f'Best score: {best_score}')
 
         logger.info(f'Fitting model, {model_name}')
 

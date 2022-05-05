@@ -4,9 +4,10 @@ import sys
 import json
 import logging
 
-from utils import get_train_test, create_folder
-from logging_utils import config_logger, create_argparser
-from run_utils import fit_keras, score, read_data, MODEL_DICT, fit
+from helpers.utils import get_train_test, create_folder
+from helpers.logging_utils import config_logger, create_argparser
+
+from run_utils import score, read_data, MODEL_DICT, fit
 
 PROC_NAME = 'skrun'
 
@@ -26,7 +27,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
 
-    with open('vars.json', 'r', encoding='utf-8') as file:
+    with open('vars/vars.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
     df, categories = read_data()

@@ -20,9 +20,9 @@ except ImportError:
 
 from pandas import get_dummies
 
-from preprocess import categorize, preprocess_3h
-from utils import columnwise_score, columnwise_confusion_matrix
-from utils_nn import get_sequential_model
+from helpers.preprocess import preprocess_3h
+from helpers.utils import columnwise_score, columnwise_confusion_matrix
+from helpers.utils_nn import get_sequential_model
 
 MODEL_DICT = {
     'xgboost': XGBClassifier(),
@@ -37,7 +37,7 @@ NN_MODEL_DICT = {
 
 def read_data():
     df = read_csv(
-        './All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv', 
+        './data/All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv', 
         encoding='cp1251', na_values='N').pipe(preprocess_3h)
     
     categories = list(df.category.unique())

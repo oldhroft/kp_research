@@ -1,13 +1,11 @@
 from datetime import datetime
 import os
-import sys
 import json
 import logging
 
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from helpers.utils import get_train_test, create_folder, validate
+from helpers.logging_utils import config_logger, create_argparser
 
-from utils import get_train_test, create_folder, validate
-from logging_utils import config_logger, create_argparser
 from run_utils import fit, score, read_data, MODEL_DICT
 
 PROC_NAME = 'skrunhld'
@@ -27,7 +25,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
 
-    with open('vars_hld.json', 'r', encoding='utf-8') as file:
+    with open('vars/vars_hld.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
     config['best_params'] = {}
@@ -57,6 +55,7 @@ if __name__ == '__main__':
                                            X_val, y_val, **config['gv_params'])
 
         logger.info(f'Best params: {best_params}')
+        logger.info(f'Best params: {best_score}')
         config['best_params'][model_name] = best_params
         params = config['init_params'][model_name].copy()
         params.update(best_params)
