@@ -6,8 +6,8 @@ import logging
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import f1_score
 
-from helpers.utils import get_train_test, create_folder, validate_keras
-from helpers.logging_utils import config_logger, create_argparser
+from scripts.helpers.utils import get_train_test, create_folder, validate_keras
+from scripts.helpers.logging_utils import config_logger, create_argparser
 
 from run_utils import fit_keras, save_history, score_keras, read_data, NN_MODEL_DICT
 

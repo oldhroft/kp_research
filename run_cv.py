@@ -5,8 +5,8 @@ import logging
 
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
-from helpers.utils import get_train_test, create_folder
-from helpers.logging_utils import config_logger, create_argparser
+from scripts.helpers.utils import get_train_test, create_folder
+from scripts.helpers.logging_utils import config_logger, create_argparser
 from run_utils import fit, score, read_data, MODEL_DICT
 
 PROC_NAME = 'skruncv'

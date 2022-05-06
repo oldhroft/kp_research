@@ -19,9 +19,9 @@ except ImportError:
 
 from pandas import get_dummies
 
-from helpers.preprocess import preprocess_3h
-from helpers.utils import columnwise_score, columnwise_confusion_matrix
-from helpers.utils_nn import get_sequential_model
+from scripts.helpers.preprocess import preprocess_3h
+from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix
+from scripts.helpers.utils_nn import get_sequential_model
 
 MODEL_DICT = {
     'xgboost': XGBClassifier(),
@@ -34,13 +34,24 @@ NN_MODEL_DICT = {
     'perceptron': get_sequential_model
 }
 
-def read_data():
+def read_data(val=False):
     df = read_csv(
         './data/All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv', 
         encoding='cp1251', na_values='N').pipe(preprocess_3h)
     
     categories = list(df.category.unique())
-    return df, sorted(categories)
+
+    df = df.set_index('dttm')
+
+    df_test = df.last('730d')
+    df_train = df.drop(df_test.index)
+
+    if val:
+        df_val = df_train.last('730d')
+        df_train = df_train.drop(df_val.index)
+        return df_train.reset_index(), df_val.reset_index(), df_test.reset_index(), categories
+    else:
+        return df_train.reset_index(), df_test.reset_index(), categories
 
 def fit(model_name, params, X_train, y_train):
     model = MultiOutputClassifier(MODEL_DICT[model_name].set_params(**params))
