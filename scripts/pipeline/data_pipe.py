@@ -31,15 +31,17 @@ def _select(df: DataFrame, columns: list) -> DataFrame:
 def _split_and_drop(data_tuple: tuple, drop_columns) -> tuple:
     df = data_tuple[0]
     y_columns = data_tuple[1]
-    y_columns.extend(drop_columns)
-    return df.drop(y_columns, axis=1), df.loc[:, y_columns]
+    return df.drop(y_columns + drop_columns, axis=1), df.loc[:, y_columns]
 
 class _StandardScalerXY(StandardScaler):
+    
     def fit(self, data_tuple: tuple):
         return super().fit(data_tuple[0])
     
     def transform(self, data_tuple: tuple, ):
-        return super().transform(data_tuple[0]), data_tuple[1].values
+        columns = data_tuple[0].columns
+        X_scaled = super().transform(data_tuple[0])
+        return DataFrame(X_scaled, columns), data_tuple[1]
     
     def fit_transform(self, data_tuple: tuple):
         return self.fit(data_tuple).transform(data_tuple)
@@ -62,7 +64,7 @@ class LagDataPipe(DataPipe):
                     "trim": True, "subset": target, 
                     "return_cols": True},
                 False),
-            (_split_and_drop, {"drop_columns": [target]}, False)  
+            (_split_and_drop, {"drop_columns": [target]}, False) ,
         ]
         if scale: self.steps.append( (_StandardScalerXY(), {}, True))
 

@@ -1,6 +1,7 @@
 import os
 
 from pandas import DataFrame, read_csv
+from pandas import get_dummies
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import RidgeClassifier
@@ -17,7 +18,6 @@ except ImportError:
     from tensorflow import random as random
     set_seed = random.set_seed
 
-from pandas import get_dummies
 
 from scripts.helpers.preprocess import preprocess_3h
 from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix
@@ -63,6 +63,7 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
     
     models = []
     histories = {}
+    y_train = DataFrame(y_train)
     for col in y_train.columns:
         set_seed(seed)
         y_dummy = get_dummies(y_train[col]).values
@@ -89,6 +90,7 @@ def score(model, model_name, X_test, y_test, root, matrix_path, proc_name):
 
 def score_keras(model, model_name, X_test, y_test, root, matrix_path, proc_name):
     preds= {}
+    y_test = DataFrame(y_test)
     for i, col in enumerate(y_test.columns):
         preds[col] = model[i].predict(X_test).argmax(axis=1)
     preds = DataFrame(preds)

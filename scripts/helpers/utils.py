@@ -123,6 +123,8 @@ def columnwise_score(scoring_func: FunctionType,
                      **kwargs) -> Series:
 
     score = Series(dtype='float64')
+    preds_df = DataFrame(preds_df)
+    true_df = DataFrame(true_df)
     for (column_pred, y_pred), (columns_true, y_true) in zip(preds_df.iteritems(), 
                                                              true_df.iteritems()):
         score.loc[column_pred] = scoring_func(y_pred, y_true, **kwargs)
@@ -132,6 +134,9 @@ def columnwise_score(scoring_func: FunctionType,
 
 def columnwise_confusion_matrix(preds_df: DataFrame, y_true_df: DataFrame, 
                                 categories: list) -> list:
+    
+    preds_df = DataFrame(preds_df)
+    y_true_df = DataFrame(y_true_df)
 
     all_matrices = {}
     for (column_pred, y_pred), (columns_true, y_true) in zip(preds_df.iteritems(), 

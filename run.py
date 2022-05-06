@@ -4,7 +4,7 @@ import sys
 import json
 import logging
 
-from scripts.helpers.utils import get_train_test, create_folder
+from scripts.helpers.utils import create_folder
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.pipeline.data_pipe import LagDataPipe
 

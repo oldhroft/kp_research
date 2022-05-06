@@ -5,9 +5,10 @@ import logging
 
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
-from scripts.helpers.utils import get_train_test, create_folder
+from scripts.helpers.utils import create_folder
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from run_utils import fit, score, read_data, MODEL_DICT
+from scripts.pipeline.data_pipe import LagDataPipe
 
 PROC_NAME = 'skruncv'
 
@@ -38,13 +39,14 @@ if __name__ == '__main__':
     with open('vars/vars_cv.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    df, categories = read_data()
+    df_train, df_test, categories = read_data()
 
-    df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'],
-                                                            24 // 3, 24)
-    X_train, y_train = df_train[lag_cols], df_train[lead_cols[0]]
-    y_train_full = df_train[lead_cols]
-    X_test, y_test = df_test[lag_cols], df_test[lead_cols]
+    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3,)
+    X_train, y_train = data_pipeline.fit_transform(df_train)
+    y_train_cv = y_train.iloc[:, 0]
+
+    X_test, y_test = data_pipeline.transform(df_test)
+    print(type(X_test))
 
     config['best_params'] = {}
     for model_name, _ in MODEL_DICT.items():
@@ -57,8 +59,8 @@ if __name__ == '__main__':
         best_params, best_score = grid_search(config['param_grids'][model_name],
                                               model_name,
                                               config['init_params'][model_name],
-                                              X_train, y_train, config['cv_params'],
-                                              config['gcv_params'])
+                                              X_train, y_train_cv, 
+                                              config['cv_params'], config['gcv_params'])
         config['best_params'][model_name] = best_params
         params = config['init_params'][model_name].copy()
         params.update(best_params)
@@ -67,7 +69,7 @@ if __name__ == '__main__':
 
 
         logger.info(f'Fitting model, {model_name}')
-        model = fit(model_name, params, X_train, y_train_full)
+        model = fit(model_name, params, X_train, y_train)
 
         logger.info(f'Scoring model, {model_name}')
         score(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
