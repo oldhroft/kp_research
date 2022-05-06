@@ -6,6 +6,7 @@ import logging
 
 from scripts.helpers.utils import get_train_test, create_folder
 from scripts.helpers.logging_utils import config_logger, create_argparser
+from scripts.pipeline.data_pipe import LagDataPipe
 
 from run_utils import score, read_data, MODEL_DICT, fit
 
@@ -30,12 +31,11 @@ if __name__ == '__main__':
     with open('vars/vars.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    df, categories = read_data()
+    df_train, df_test, categories = read_data()
+    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3,)
     
-    df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'], 24 // 3, 24)
-    X_train, y_train = df_train[lag_cols], df_train[lead_cols]
-    X_test, y_test = df_test[lag_cols], df_test[lead_cols]
-
+    X_train, y_train = data_pipeline.fit_transform(df_train)
+    X_test, y_test = data_pipeline.transform(df_test)
         
     model_name_param = sys.argv[2] if len(sys.argv) > 2 else None
 
