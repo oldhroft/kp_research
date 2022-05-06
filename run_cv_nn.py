@@ -9,22 +9,24 @@ from sklearn.preprocessing import StandardScaler
 from helpers.utils import get_train_test, create_folder, validate_keras_cv
 from helpers.logging_utils import config_logger, create_argparser
 
-from run_utils import fit_keras, score_keras, read_data, NN_MODEL_DICT
+from run_utils import fit_keras, save_history, score_keras, read_data, NN_MODEL_DICT
 
 PROC_NAME = 'nnruncv'
 
 def create_folder_structure(root):
     matrix_path = os.path.join(root, 'matrix')
+    history_parh = os.path.join(root, 'history')
     create_folder(root)
     create_folder(matrix_path)
-
-    return root, matrix_path
+    create_folder(history_parh)
+    
+    return root, matrix_path, history_parh
 
 
 if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
-    root, matrix_path = create_folder_structure(arguments.folder)
+    root, matrix_path, history_path = create_folder_structure(arguments.folder)
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
@@ -57,7 +59,7 @@ if __name__ == '__main__':
         logger.info(f'Grid search model, {model_name}')
         best_params, best_score = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
                                                     len(categories), config['cv_params'],
-                                                    config['grid_params'][model_name],
+                                                    config['param_grids'][model_name],
                                                     f1_score, X_train_scaled, y_train,
                                                     config['callback_params'][model_name],
                                                     config['scoring_params'], 
@@ -74,13 +76,14 @@ if __name__ == '__main__':
         final_params = config['init_params'][model_name].copy()
         final_params.update(best_params)
 
-        model = fit_keras(model_name, shape, len(categories), 
-                          final_params, config['fit_params'][model_name],
-                          config['callback_params'][model_name],
-                          X_train_scaled, y_train_full, config['seed'])
+        model, history = fit_keras(model_name, shape, len(categories), 
+                                   final_params, config['fit_params'][model_name],
+                                   config['callback_params'][model_name],
+                                   X_train_scaled, y_train_full, config['seed'])
 
         logger.info(f'Scoring model, {model_name}')
         score_keras(model, model_name, X_test_scaled, y_test, root, matrix_path, PROC_NAME)
+        save_history(history, model_name, history_path, PROC_NAME)
     
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
     with open(os.path.join(root, 'vars_cv_nn.json'), 'w', encoding='utf-8') as file:

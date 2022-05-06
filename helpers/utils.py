@@ -234,3 +234,44 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
 
     return best_param, best_score
 
+def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
+                   params: dict, scoring: FunctionType,
+                   X_train: DataFrame, y_train: Series,
+                   X_val: DataFrame, y_val: Series,
+                   callback_params: dict, scoring_params: dict,
+                   init_params: dict, fit_params: dict,
+                   verbose: bool, seed: int,) -> list:
+    
+    best_score = 0
+    best_param = None
+
+    for param in _create_param_grid(params):
+
+        start_time = time.time()
+        if seed is not None: set_seed(seed)
+        if verbose: print('Fitting param {}'.format(param))
+        full_params = init_params.copy()
+        full_params.update(param)
+
+        callbacks_list = [
+            callbacks.EarlyStopping(**callback_params),
+        ]
+        model_param = model(input_shape, n_classes, **full_params)
+        y_train = get_dummies(y_train)
+
+        model_param.fit(X_train, y_train.values, callbacks=callbacks_list,
+                        **fit_params)
+
+        y_preds = model_param.predict(X_val).argmax(axis=1)
+        score = scoring(y_preds, y_val, **scoring_params)
+
+        if score > best_score:
+            best_score = score
+            best_param = param
+
+        end_time = time.time()
+        if verbose: print('Param {}, time {:.2f}'.format(param, 
+                                                         end_time - start_time))
+
+    return best_param, best_score
+

@@ -1,5 +1,4 @@
 import os
-from random import seed
 
 from pandas import DataFrame, read_csv
 from xgboost import XGBClassifier
@@ -52,6 +51,7 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
               fit_params, callback_params, X_train, y_train, seed):
     
     models = []
+    histories = {}
     for col in y_train.columns:
         set_seed(seed)
         y_dummy = get_dummies(y_train[col]).values
@@ -59,10 +59,11 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
         callbacks_list = [
             callbacks.EarlyStopping(**callback_params),
         ]
-        model.fit(X_train, y_dummy, callbacks=callbacks_list, **fit_params)
+        history = model.fit(X_train, y_dummy, callbacks=callbacks_list, **fit_params)
         models.append(model)
+        histories[col] = history
     
-    return models
+    return models, histories
 
 def score(model, model_name, X_test, y_test, root, matrix_path, proc_name):
     preds = model.predict(X_test)
@@ -87,3 +88,9 @@ def score_keras(model, model_name, X_test, y_test, root, matrix_path, proc_name)
     for key, matrix in confusion_matrices.items():
         matrix.to_excel(
             os.path.join(matrix_path, f'{proc_name}_{model_name}_{key}.xlsx'))
+
+def save_history(history, model_name: str, history_path: str, proc_name: str,) -> None:
+    for col, item in history.items():
+        history_ = DataFrame(item.history)
+        filename = os.path.join(history_path, f'{proc_name}_{model_name}_history.csv')
+        history_.to_csv(filename)

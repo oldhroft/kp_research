@@ -7,10 +7,7 @@
     "param_grids": {
         "perceptron": {
             "units_array": [
-                [16], [32],
-                [64], [128],
-                [16, 8], [32, 16], [64, 32], [128, 64],
-                [16, 8, 4], [32, 16, 8], [64, 32, 16], [128, 64, 32]
+                [16]
             ]
         }
     },
@@ -37,12 +34,7 @@
             "patience": 10
         }
     },
-    "cv_params": {
-        "shuffle": false,
-        "n_splits": 5,
-        "random_state": null
-    },
-    "gcv_params": {
+    "gv_params": {
         "verbose": 1,
         "seed": 17
     },
