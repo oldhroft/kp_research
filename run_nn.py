@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 from scripts.helpers.utils import get_train_test, create_folder
 from scripts.helpers.logging_utils import config_logger, create_argparser
+from scripts.pipeline.data_pipe import LagDataPipe
 
 from run_utils import fit_keras, save_history, read_data, NN_MODEL_DICT, score_keras
 
@@ -33,18 +34,14 @@ if __name__ == '__main__':
     with open('vars/vars_nn.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
         
-    df, categories = read_data()
+    df_train, df_test, categories = read_data()
+    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3, scale=True,
+                                shuffle=True, random_state=config['random_state'])
     
-    df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'], 24 // 3, 24)
-    df_train = df_train.sample(frac=1., random_state=config['seed'])
-    X_train, y_train = df_train[lag_cols], df_train[lead_cols]
-    X_test, y_test = df_test[lag_cols], df_test[lead_cols]
+    X_train, y_train = data_pipeline.fit_transform(df_train)
+    X_test, y_test = data_pipeline.transform(df_test)
 
-    scaler = StandardScaler().fit(X_train)
-
-    X_train_scaled = scaler.transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    shape = (X_train_scaled.shape[1], )
+    shape = (X_train.shape[1], )
 
     for model_name, _ in NN_MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:
@@ -57,10 +54,10 @@ if __name__ == '__main__':
                                    config['init_params'][model_name], 
                                    config['fit_params'][model_name],
                                    config['callback_params'][model_name],
-                                   X_train_scaled, y_train, config['seed'])
+                                   X_train, y_train, config['random_state'])
 
         logger.info(f'Scoring model, {model_name}')
-        score_keras(model, model_name, X_test_scaled, y_test, root, matrix_path, PROC_NAME)
+        score_keras(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
         save_history(history, model_name, history_path, PROC_NAME)
 
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")

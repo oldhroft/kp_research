@@ -222,7 +222,7 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
             X_train, y_train = X[train_idx], y[train_idx]
             X_test, y_test = X[test_idx], y[test_idx]
             y_train = get_dummies(y_train)
-            model_param.fit(X_train, y_train.values, callbacks=callbacks_list,
+            model_param.fit(X_train.values, y_train.values, callbacks=callbacks_list,
                             **fit_params)
             y_preds = model_param.predict(X_test).argmax(axis=1)
             sub_scores.append(scoring(y_preds, y_test, **scoring_params))
@@ -264,7 +264,7 @@ def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
         model_param = model(input_shape, n_classes, **full_params)
         y_train = get_dummies(y_train)
 
-        model_param.fit(X_train, y_train.values, callbacks=callbacks_list,
+        model_param.fit(X_train.values, y_train.values, callbacks=callbacks_list,
                         **fit_params)
 
         y_preds = model_param.predict(X_val).argmax(axis=1)

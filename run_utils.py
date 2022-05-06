@@ -18,7 +18,6 @@ except ImportError:
     from tensorflow import random as random
     set_seed = random.set_seed
 
-
 from scripts.helpers.preprocess import preprocess_3h
 from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix
 from scripts.helpers.utils_nn import get_sequential_model
@@ -66,12 +65,13 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
     y_train = DataFrame(y_train)
     for col in y_train.columns:
         set_seed(seed)
-        y_dummy = get_dummies(y_train[col]).values
+        y_dummy = get_dummies(y_train[col])
         model = NN_MODEL_DICT[model_name](input_shape, n_classes, **init_params)
         callbacks_list = [
             callbacks.EarlyStopping(**callback_params),
         ]
-        history = model.fit(X_train, y_dummy, callbacks=callbacks_list, **fit_params)
+        history = model.fit(X_train.values, y_dummy.values, 
+                            callbacks=callbacks_list, **fit_params)
         models.append(model)
         histories[col] = history
     
@@ -92,7 +92,7 @@ def score_keras(model, model_name, X_test, y_test, root, matrix_path, proc_name)
     preds= {}
     y_test = DataFrame(y_test)
     for i, col in enumerate(y_test.columns):
-        preds[col] = model[i].predict(X_test).argmax(axis=1)
+        preds[col] = model[i].predict(X_test.values).argmax(axis=1)
     preds = DataFrame(preds)
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average='macro')
     fname = os.path.join(root, f'{proc_name}_{model_name}_f1.csv')
@@ -105,5 +105,5 @@ def score_keras(model, model_name, X_test, y_test, root, matrix_path, proc_name)
 def save_history(history, model_name: str, history_path: str, proc_name: str,) -> None:
     for col, item in history.items():
         history_ = DataFrame(item.history)
-        filename = os.path.join(history_path, f'{proc_name}_{model_name}_history.csv')
+        filename = os.path.join(history_path, f'{proc_name}_{model_name}_{col}_history.csv')
         history_.to_csv(filename)

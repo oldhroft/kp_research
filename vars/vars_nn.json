@@ -5,7 +5,7 @@
             "optimizer": "adam"
         }
     },
-    "seed": 16,
+    "random_state": 16,
     "variables": [
         "Kp*10", "Dst", "B_x", "B_gsm_y", "B_gsm_z", 
         "B_magn", "SW_spd", "H_den_SWP", "doySin", "hourSin",
