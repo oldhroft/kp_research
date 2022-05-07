@@ -1,4 +1,5 @@
 import os
+import joblib
 
 from pandas import DataFrame, read_csv
 from pandas import get_dummies
@@ -10,6 +11,7 @@ from sklearn.metrics import f1_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.dummy import DummyClassifier
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 from tensorflow.keras import callbacks as callbacks
 try:
@@ -19,7 +21,7 @@ except ImportError:
     set_seed = random.set_seed
 
 from scripts.helpers.preprocess import preprocess_3h
-from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix
+from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix, create_folder
 from scripts.helpers.utils_nn import get_sequential_model
 
 MODEL_DICT = {
@@ -52,6 +54,26 @@ def read_data(val=False):
     else:
         return df_train.reset_index(), df_test.reset_index(), categories
 
+def create_folder_structure(root):
+    matrix_path = os.path.join(root, 'matrix')
+    model_path = os.path.join(root, 'models')
+    history_path = os.path.join(root, 'history')
+    create_folder(root)
+    create_folder(matrix_path)
+    create_folder(model_path)
+    create_folder(history_path)
+    structure = dict(root=root, model_path=model_path, 
+                     matrix_path=matrix_path, history_path=history_path)
+    return structure
+
+def grid_search(params, model_name, init_params, X_train, y_train, 
+                cv_params, gcv_params):
+    model = MODEL_DICT[model_name].set_params(**init_params)
+    skf = StratifiedKFold(**cv_params)
+    gcv = GridSearchCV(model, params, cv=skf, **gcv_params)
+    gcv.fit(X_train, y_train)
+    return gcv.best_params_, gcv.best_score_
+
 def fit(model_name, params, X_train, y_train):
     model = MultiOutputClassifier(MODEL_DICT[model_name].set_params(**params))
     model.fit(X_train, y_train)
@@ -77,33 +99,46 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
     
     return models, histories
 
-def score(model, model_name, X_test, y_test, root, matrix_path, proc_name):
+def score(model, model_name, X_test, y_test, structure, proc_name):
     preds = model.predict(X_test)
     preds = DataFrame(preds)
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average='macro')
-    fname = os.path.join(root, f'{proc_name}_{model_name}_f1.csv')
+    fname = os.path.join(structure['root'], f'{proc_name}_{model_name}_f1.csv')
     f1_macro_res.to_csv(fname)
     confusion_matrices = columnwise_confusion_matrix(preds, y_test, [0, 1, 2])
     for key, matrix in confusion_matrices.items():
         matrix.to_excel(
-            os.path.join(matrix_path, f'{proc_name}_{model_name}_{key}.xlsx'))
+            os.path.join(structure['matrix_path'], f'{proc_name}_{model_name}_{key}.xlsx'))
 
-def score_keras(model, model_name, X_test, y_test, root, matrix_path, proc_name):
+def score_keras(model, model_name, X_test, y_test, structure, proc_name):
     preds= {}
     y_test = DataFrame(y_test)
     for i, col in enumerate(y_test.columns):
         preds[col] = model[i].predict(X_test.values).argmax(axis=1)
     preds = DataFrame(preds)
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average='macro')
-    fname = os.path.join(root, f'{proc_name}_{model_name}_f1.csv')
+    fname = os.path.join(structure['root'], f'{proc_name}_{model_name}_f1.csv')
     f1_macro_res.to_csv(fname)
     confusion_matrices = columnwise_confusion_matrix(preds, y_test, [0, 1, 2])
     for key, matrix in confusion_matrices.items():
         matrix.to_excel(
-            os.path.join(matrix_path, f'{proc_name}_{model_name}_{key}.xlsx'))
+            os.path.join(structure['matrix_path'], f'{proc_name}_{model_name}_{key}.xlsx'))
 
-def save_history(history, model_name: str, history_path: str, proc_name: str,) -> None:
+def save_history(history, model_name: str, structure: str, proc_name: str,) -> None:
     for col, item in history.items():
         history_ = DataFrame(item.history)
-        filename = os.path.join(history_path, f'{proc_name}_{model_name}_{col}_history.csv')
+        filename = os.path.join(structure['history_path'], 
+                                f'{proc_name}_{model_name}_{col}_history.csv')
         history_.to_csv(filename)
+
+def save_model(model, model_name: str, structure: str, proc_name: str,):
+    filename = os.path.join(structure['model_path'], 
+                            f'{proc_name}_{model_name}_model.pkl')
+    joblib.dump(model, filename)
+
+def save_model_keras(model, model_name: str, structure: str, proc_name: str,):
+
+    for i, model_ in enumerate(model):
+        filename = os.path.join(structure['model_path'], 
+                                f'{proc_name}_{model_name}_{i}_model')
+        model_.save(filename)

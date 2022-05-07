@@ -21,7 +21,6 @@ class DataPipe(object):
             X = step(X, **arg)
         return X
 
-from scipy import rand
 from sklearn.preprocessing import StandardScaler
 from pandas import DataFrame
 from ..helpers.utils import add_lags 

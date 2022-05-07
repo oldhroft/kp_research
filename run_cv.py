@@ -3,40 +3,24 @@ import os
 import json
 import logging
 
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
-
-from scripts.helpers.utils import create_folder
 from scripts.helpers.logging_utils import config_logger, create_argparser
-from run_utils import fit, score, read_data, MODEL_DICT
 from scripts.pipeline.data_pipe import LagDataPipe
 
+from run_utils import fit, score, read_data, MODEL_DICT, save_model
+from run_utils import create_folder_structure, grid_search
+
 PROC_NAME = 'skruncv'
-
-def create_folder_structure(root):
-    matrix_path = os.path.join(root, 'matrix')
-    create_folder(root)
-    create_folder(matrix_path)
-
-    return root, matrix_path
-
-def grid_search(params, model_name, init_params, X_train, y_train, 
-                cv_params, gcv_params):
-    model = MODEL_DICT[model_name].set_params(**init_params)
-    skf = StratifiedKFold(**cv_params)
-    gcv = GridSearchCV(model, params, cv=skf, **gcv_params)
-    gcv.fit(X_train, y_train)
-    return gcv.best_params_, gcv.best_score_
-
 
 if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
-    root, matrix_path = create_folder_structure(arguments.folder)
+    structure = create_folder_structure(arguments.folder)
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
 
-    with open('vars/vars_cv.json', 'r', encoding='utf-8') as file:
+    vars_path = 'vars/vars_cv.json' if arguments.vars is None else arguments.vars
+    with open(vars_path, 'r', encoding='utf-8') as file:
         config = json.load(file)
 
     df_train, df_test, categories = read_data()
@@ -72,10 +56,12 @@ if __name__ == '__main__':
         model = fit(model_name, params, X_train, y_train)
 
         logger.info(f'Scoring model, {model_name}')
-        score(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
+        score(model, model_name, X_test, y_test, structure, PROC_NAME)
+        if arguments.save_models:
+            save_model(model, model_name, structure, PROC_NAME)
     
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
-    with open(os.path.join(root, 'vars_cv.json'), 'w', encoding='utf-8') as file:
+    with open(os.path.join(structure['root'], 'vars_cv.json'), 'w', encoding='utf-8') as file:
         json.dump(config, file, indent=4)
 
 
