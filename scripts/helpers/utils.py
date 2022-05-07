@@ -114,14 +114,15 @@ from sklearn.base import clone
 import time
 from itertools import product
 from sklearn.metrics import SCORERS
+from numpy import array
 
 def _create_param_grid(params: dict) -> map:
     return map(lambda x: dict(zip(params.keys(), x)), 
                product(*params.values()))
 
 def validate(model, params: list,
-             X_train: DataFrame, y_train: Series,
-             X_val: DataFrame, y_val: Series,
+             X_train: array, y_train: array,
+             X_val: array, y_val: array,
              scoring: str, verbose: int=1,) -> list:
     
     best_score = 0
@@ -147,7 +148,7 @@ def validate(model, params: list,
 
 from pandas import Series, DataFrame
 from pandas import get_dummies
-from numpy import mean, array
+from numpy import mean
 from sklearn.model_selection import StratifiedKFold
 from tensorflow.keras import callbacks as callbacks
 try:
