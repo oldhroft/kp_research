@@ -4,10 +4,9 @@ import json
 import logging
 from sklearn.metrics import f1_score
 
-from sklearn.preprocessing import StandardScaler
-
-from scripts.helpers.utils import get_train_test, create_folder, validate_keras_cv
+from scripts.helpers.utils import create_folder, validate_keras_cv
 from scripts.helpers.logging_utils import config_logger, create_argparser
+from scripts.pipeline.data_pipe import LagDataPipe
 
 from run_utils import fit_keras, save_history, score_keras, read_data, NN_MODEL_DICT
 
@@ -34,20 +33,13 @@ if __name__ == '__main__':
     with open('vars/vars_cv_nn.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    df, categories = read_data()
+    df_train, df_test, categories = read_data()
+    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3, scale=True,
+                                shuffle=True, random_state=config['random_state'])
+    X_train, y_train = data_pipeline.fit_transform(df_train)
+    X_test, y_test = data_pipeline.transform(df_test)
 
-    df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'],
-                                                            24 // 3, 24)
-    X_train, y_train = df_train[lag_cols], df_train[lead_cols[0]]
-    df_train = df_train.sample(frac=1., random_state=config['random_state'])
-    y_train_full = df_train[lead_cols]
-    X_test, y_test = df_test[lag_cols], df_test[lead_cols]
-
-    scaler = StandardScaler().fit(X_train)
-
-    X_train_scaled = scaler.transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    shape = (X_train_scaled.shape[1], )
+    shape = (X_train.shape[1], )
 
     config['best_params'] = {}
     for model_name, _ in NN_MODEL_DICT.items():
@@ -60,7 +52,7 @@ if __name__ == '__main__':
         best_params, best_score = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
                                                     len(categories), config['cv_params'],
                                                     config['param_grids'][model_name],
-                                                    f1_score, X_train_scaled, y_train,
+                                                    f1_score, X_train, y_train.iloc[:, 0],
                                                     config['callback_params'][model_name],
                                                     config['scoring_params'], 
                                                     config['init_params'][model_name],
@@ -79,10 +71,10 @@ if __name__ == '__main__':
         model, history = fit_keras(model_name, shape, len(categories), 
                                    final_params, config['fit_params'][model_name],
                                    config['callback_params'][model_name],
-                                   X_train_scaled, y_train_full, config['seed'])
+                                   X_train, y_train, config['seed'])
 
         logger.info(f'Scoring model, {model_name}')
-        score_keras(model, model_name, X_test_scaled, y_test, root, matrix_path, PROC_NAME)
+        score_keras(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
         save_history(history, model_name, history_path, PROC_NAME)
     
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")

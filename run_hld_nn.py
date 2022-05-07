@@ -3,11 +3,12 @@ import os
 import json
 import logging
 
-from sklearn.preprocessing import StandardScaler
+from pandas import concat
 from sklearn.metrics import f1_score
 
-from scripts.helpers.utils import get_train_test, create_folder, validate_keras
+from scripts.helpers.utils import create_folder, validate_keras
 from scripts.helpers.logging_utils import config_logger, create_argparser
+from scripts.pipeline.data_pipe import LagDataPipe
 
 from run_utils import fit_keras, save_history, score_keras, read_data, NN_MODEL_DICT
 
@@ -34,27 +35,17 @@ if __name__ == '__main__':
 
     config['best_params'] = {}
 
-    df, categories = read_data()
+    df_train, df_test, df_val, categories = read_data(val=True)
 
-    df_train, lag_cols, df_val, _, _, lead_cols = get_train_test(df, config['variables'], 
-                                                                 24 // 3, 24, last_val='24m')
+    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3, scale=True,
+                                shuffle=True, random_state=config['random_state'])
+    X_train, y_train = data_pipeline.fit_transform(df_train)
+    X_test, y_test = data_pipeline.transform(df_test)
+    X_val, y_val = data_pipeline.transform(df_val)
 
-    df_train = df_train.sample(frac=1., random_state=config['random_state'])
-    X_train, y_train = df_train[lag_cols], df_train[lead_cols[0]]
-    X_val, y_val = df_val[lag_cols], df_val[lead_cols[0]]
-
-    scaler = StandardScaler().fit(X_train)
-    X_train = scaler.transform(X_train)
-    X_val = scaler.transform(X_val)
-
-    df_train, lag_cols, df_test, lead_cols = get_train_test(df, config['variables'], 
-                                                                  24 // 3, 24,)
-    df_train = df_train.sample(frac=1., random_state=config['random_state'])                                                           
-    X_train_full, y_train_full = df_train[lag_cols], df_train[lead_cols]
-    X_test, y_test = df_test[lag_cols], df_test[lead_cols]
-
-    X_train_full = scaler.fit_transform(X_train_full)
-    X_test = scaler.transform(X_test)
+    df_train_full = concat([df_train, df_val], ignore_index=True)
+    X_train_full, y_train_full = data_pipeline.fit_transform(df_train_full)
+    X_test_full, y_test_full = data_pipeline.transform(df_test)
 
     shape = (X_train.shape[1], )
 
@@ -68,8 +59,8 @@ if __name__ == '__main__':
         
         best_params, best_score = validate_keras(NN_MODEL_DICT[model_name], shape,  
                                                  len(categories), config['param_grids'][model_name],
-                                                 f1_score, X_train, y_train,
-                                                 X_val, y_val,
+                                                 f1_score, X_train, y_train.iloc[:, 0],
+                                                 X_val, y_val.iloc[:, 0],
                                                  config['callback_params'][model_name],
                                                  config['scoring_params'],
                                                  config['init_params'][model_name],
@@ -89,7 +80,7 @@ if __name__ == '__main__':
                                    X_train_full, y_train_full, config['seed'])
 
         logger.info(f'Scoring model, {model_name}')
-        score_keras(model, model_name, X_test, y_test, root, matrix_path, PROC_NAME)
+        score_keras(model, model_name, X_test_full, y_test_full, root, matrix_path, PROC_NAME)
         save_history(history, model_name, history_path, PROC_NAME)
 
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")

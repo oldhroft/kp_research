@@ -78,6 +78,7 @@ class LagDataPipe(DataPipe):
             (_split_and_drop, {"drop_columns": [target]}, False) ,
         ]
         if scale: self.steps.append( (_StandardScalerXY(), {}, True))
+        
 
 
 

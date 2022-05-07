@@ -75,45 +75,6 @@ def add_lags(df: DataFrame, subset: list=None, forward: bool=False,
         return _trim(x, forward, trim, lags)
 
 
-def get_train_test(df: DataFrame, columns: list, 
-                   forward_steps: int, backward_steps: int, 
-                   last: str='24m', last_val=None) -> tuple:
-
-    ts_df_back, lag_cols = add_lags(df, lags=backward_steps, forward=False, 
-                                    trim=True, subset=columns, 
-                                    return_cols=True)
-    lag_cols.extend(columns)
-    ts_df_back_test = ts_df_back.set_index('dttm').last(last)
-
-    index_test = ts_df_back_test.index
-    ts_df_back_train = ts_df_back.set_index('dttm').drop(index_test)
-
-
-    if last_val is not None:
-        ts_df_back_val = ts_df_back_train.last(last_val)
-        index_val = ts_df_back_val.index
-        ts_df_back_train = ts_df_back_train.drop(index_val)
-        df_val, lead_cols = add_lags(ts_df_back_val, lags=forward_steps,
-                                       forward=True, trim=True, 
-                                       subset='category', return_cols=True)
-
-    df_train, lead_cols = add_lags(ts_df_back_train, lags=forward_steps,
-                                   forward=True, trim=True, 
-                                   subset='category', return_cols=True)
-    df_test, lead_cols = add_lags(ts_df_back_test, lags=forward_steps, 
-                                  forward=True, trim=True, 
-                                  subset='category', return_cols=True)
-    if last_val is not None:
-        return (
-            df_train.reset_index(), lag_cols,
-            df_val.reset_index(), lag_cols,
-            df_test.reset_index(), lead_cols)
-    else:
-        return (
-            df_train.reset_index(), lag_cols,
-            df_test.reset_index(), lead_cols)
-
-
 from sklearn.metrics import confusion_matrix
 from types import FunctionType
 
@@ -219,12 +180,12 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
             ]
             
             model_param = model(input_shape, n_classes, **full_params)
-            X_train, y_train = X[train_idx], y[train_idx]
-            X_test, y_test = X[test_idx], y[test_idx]
+            X_train, y_train = X.iloc[train_idx], y.iloc[train_idx]
+            X_test, y_test = X.iloc[test_idx], y.iloc[test_idx]
             y_train = get_dummies(y_train)
             model_param.fit(X_train.values, y_train.values, callbacks=callbacks_list,
                             **fit_params)
-            y_preds = model_param.predict(X_test).argmax(axis=1)
+            y_preds = model_param.predict(X_test.values).argmax(axis=1)
             sub_scores.append(scoring(y_preds, y_test, **scoring_params))
         
         score = mean(sub_scores)
@@ -267,7 +228,7 @@ def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
         model_param.fit(X_train.values, y_train.values, callbacks=callbacks_list,
                         **fit_params)
 
-        y_preds = model_param.predict(X_val).argmax(axis=1)
+        y_preds = model_param.predict(X_val.values).argmax(axis=1)
         score = scoring(y_preds, y_val, **scoring_params)
 
         if score > best_score:
@@ -279,4 +240,3 @@ def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
                                                          end_time - start_time))
 
     return best_param, best_score
-
