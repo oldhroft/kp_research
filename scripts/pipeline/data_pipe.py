@@ -85,7 +85,30 @@ class LagDataPipe(DataPipe):
             (_as_numpy, {}, False)
         ]
         if scale: self.steps.append( (_StandardScalerXY(), {}, True))
+
+def _reshape(data_tuple, n_features, time_steps):
+    X = data_tuple[0].reshape((-1, time_steps, n_features))
+    y = data_tuple[1]
+    return X, y
+def _pack_with_array(data_tuple, array):
+    return tuple((*data_tuple, array))
+
+class SequenceDataPipe(LagDataPipe):
+    
+    def __init__(self, variables, target, backward_steps, forward_steps,
+                 scale=False, shuffle=True, random_state=None):
         
+        super().__init__(variables, target, backward_steps, forward_steps,
+                         scale=False, shuffle=True, random_state=None)
+        
+        self.steps.extend([
+            (
+                _reshape, {
+                    "n_features": len(variables), 
+                    "time_steps": backward_steps + 1
+                }, False),
+            (_pack_with_array, {"array": variables}, False)
+        ])
 
 
 

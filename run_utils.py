@@ -24,7 +24,7 @@ except ImportError:
 
 from scripts.helpers.preprocess import preprocess_3h
 from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix, create_folder
-from scripts.helpers.utils_nn import get_sequential_model
+from scripts.models.models import *
 
 from scripts.pipeline.data_pipe import LagDataPipe
 
@@ -36,7 +36,9 @@ MODEL_DICT = {
 }
 
 NN_MODEL_DICT = {
-    'perceptron': get_sequential_model
+    'perceptron': get_sequential_model,
+    'lstm': get_lstm_model,
+    "gru": get_gru_model,
 }
 
 def read_data(val=False):
