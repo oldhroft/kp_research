@@ -147,7 +147,7 @@ def validate(model, params: list,
 
 from pandas import Series, DataFrame
 from pandas import get_dummies
-from numpy import mean
+from numpy import mean, array
 from sklearn.model_selection import StratifiedKFold
 from tensorflow.keras import callbacks as callbacks
 try:
@@ -158,7 +158,7 @@ except ImportError:
 
 def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
                       cv_params: dict, params: dict, scoring: FunctionType,
-                      X: DataFrame, y: Series,
+                      X: array, y: array,
                       callback_params: dict, scoring_params: dict,
                       init_params: dict, fit_params: dict,
                       verbose: bool, seed: int,) -> list:
@@ -180,12 +180,12 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
             ]
             
             model_param = model(input_shape, n_classes, **full_params)
-            X_train, y_train = X.iloc[train_idx], y.iloc[train_idx]
-            X_test, y_test = X.iloc[test_idx], y.iloc[test_idx]
-            y_train = get_dummies(y_train)
-            model_param.fit(X_train.values, y_train.values, callbacks=callbacks_list,
+            X_train, y_train = X[train_idx], y[train_idx]
+            X_test, y_test = X[test_idx], y[test_idx]
+            y_train = array(get_dummies(y_train))
+            model_param.fit(X_train, y_train, callbacks=callbacks_list,
                             **fit_params)
-            y_preds = model_param.predict(X_test.values).argmax(axis=1)
+            y_preds = model_param.predict(X_test).argmax(axis=1)
             sub_scores.append(scoring(y_preds, y_test, **scoring_params))
         
         score = mean(sub_scores)
@@ -202,8 +202,8 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
 
 def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
                    params: dict, scoring: FunctionType,
-                   X_train: DataFrame, y_train: Series,
-                   X_val: DataFrame, y_val: Series,
+                   X_train: array, y_train: array,
+                   X_val: array, y_val: array,
                    callback_params: dict, scoring_params: dict,
                    init_params: dict, fit_params: dict,
                    verbose: bool, seed: int,) -> list:
@@ -223,12 +223,12 @@ def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
             callbacks.EarlyStopping(**callback_params),
         ]
         model_param = model(input_shape, n_classes, **full_params)
-        y_train = get_dummies(y_train)
+        y_train = array(get_dummies(y_train))
 
-        model_param.fit(X_train.values, y_train.values, callbacks=callbacks_list,
+        model_param.fit(X_train, y_train, callbacks=callbacks_list,
                         **fit_params)
 
-        y_preds = model_param.predict(X_val.values).argmax(axis=1)
+        y_preds = model_param.predict(X_val).argmax(axis=1)
         score = scoring(y_preds, y_val, **scoring_params)
 
         if score > best_score:

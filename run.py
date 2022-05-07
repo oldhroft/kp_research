@@ -1,13 +1,12 @@
 from datetime import datetime
 import os
-import sys
 import json
 import logging
 
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.pipeline.data_pipe import LagDataPipe
 
-from run_utils import save_model, score, read_data, MODEL_DICT, fit
+from run_utils import get_data_pipeline, save_model, score, read_data, MODEL_DICT, fit
 from run_utils import create_folder_structure
 
 PROC_NAME = 'skrun'
@@ -26,12 +25,15 @@ if __name__ == '__main__':
         config = json.load(file)
 
     df_train, df_test, categories = read_data()
-    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3,)
+
+    logger.info(f'Data processing...')
+    data_pipeline = get_data_pipeline(config, "default")
     
-    X_train, y_train = data_pipeline.fit_transform(df_train)
-    X_test, y_test = data_pipeline.transform(df_test)
-        
-    model_name_param = sys.argv[2] if len(sys.argv) > 2 else None
+    X_train, y_train, features = data_pipeline.fit_transform(df_train)
+    X_test, y_test, features = data_pipeline.transform(df_test)
+    
+    logger.info(f'X_train shape {X_train.shape}')
+    logger.info(f'X_test shape {X_test.shape}')
 
     for model_name, _ in MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:

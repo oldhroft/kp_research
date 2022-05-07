@@ -9,7 +9,7 @@ from scripts.helpers.utils import validate
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.pipeline.data_pipe import LagDataPipe
 
-from run_utils import fit, score, read_data, MODEL_DICT, save_model
+from run_utils import fit, get_data_pipeline, score, read_data, MODEL_DICT, save_model
 from run_utils import create_folder_structure
 
 PROC_NAME = 'skrunhld'
@@ -30,14 +30,20 @@ if __name__ == '__main__':
 
     df_train, df_test, df_val, categories = read_data(val=True)
 
-    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3,)
-    X_train, y_train = data_pipeline.fit_transform(df_train)
-    X_test, y_test = data_pipeline.transform(df_test)
-    X_val, y_val = data_pipeline.transform(df_val)
+    logger.info(f'Data processing...')
+    data_pipeline =get_data_pipeline(config, "default")
+    X_train, y_train, features = data_pipeline.fit_transform(df_train)
+    X_test, y_test, features = data_pipeline.transform(df_test)
+    X_val, y_val, features = data_pipeline.transform(df_val)
 
     df_train_full = concat([df_train, df_val], ignore_index=True)
-    X_train_full, y_train_full = data_pipeline.fit_transform(df_train_full)
-    X_test_full, y_test_full = data_pipeline.transform(df_test)
+    X_train_full, y_train_full, features = data_pipeline.fit_transform(df_train_full)
+    X_test_full, y_test_full, features = data_pipeline.transform(df_test)
+
+    logger.info(f'X_train shape {X_train.shape}')
+    logger.info(f'X_val shape {X_val.shape}')
+    logger.info(f'X_test shape {X_test.shape}')
+    logger.info(f'X_train_full shape {X_train_full.shape}')
 
     for model_name, model in MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:
@@ -48,8 +54,8 @@ if __name__ == '__main__':
         logger.info(f'Grid search model, {model_name}')
         model = model.set_params(**config['init_params'][model_name])
         best_score, best_params = validate(model, config['param_grids'][model_name],
-                                           X_train, y_train.iloc[:, 0],
-                                           X_val, y_val.iloc[:, 0], **config['gv_params'])
+                                           X_train, y_train[:, 0],
+                                           X_val, y_val[:, 0], **config['gv_params'])
 
         logger.info(f'Best params: {best_params}')
         logger.info(f'Best score: {best_score}')

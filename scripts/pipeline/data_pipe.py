@@ -23,6 +23,7 @@ class DataPipe(object):
 
 from sklearn.preprocessing import StandardScaler
 from pandas import DataFrame
+from numpy import array
 from ..helpers.utils import add_lags 
 
 def _select(df: DataFrame, columns: list) -> DataFrame:
@@ -33,6 +34,9 @@ def _split_and_drop(data_tuple: tuple, drop_columns) -> tuple:
     y_columns = data_tuple[1]
     return df.drop(y_columns + drop_columns, axis=1), df.loc[:, y_columns]
 
+def _get_feature_names(data_tuple: tuple,) -> tuple:
+    return data_tuple[0], data_tuple[1], data_tuple[0].columns
+    
 def _shuffle(data_tuple: tuple, shuffle: bool, random_state: int) -> DataFrame:
     if shuffle:
         X = data_tuple[0]
@@ -41,15 +45,17 @@ def _shuffle(data_tuple: tuple, shuffle: bool, random_state: int) -> DataFrame:
     else:
         return data_tuple
 
+def _as_numpy(data_tuple: tuple) -> tuple:
+    return tuple(map(array, data_tuple))
+
 class _StandardScalerXY(StandardScaler):
     
     def fit(self, data_tuple: tuple):
         return super().fit(data_tuple[0])
     
     def transform(self, data_tuple: tuple, ):
-        columns = data_tuple[0].columns
         X_scaled = super().transform(data_tuple[0])
-        return DataFrame(X_scaled, columns=columns), data_tuple[1]
+        return tuple([X_scaled, *data_tuple[1: ]])
     
     def fit_transform(self, data_tuple: tuple):
         return self.fit(data_tuple).transform(data_tuple)
@@ -57,14 +63,14 @@ class _StandardScalerXY(StandardScaler):
 
 class LagDataPipe(DataPipe):
 
-    def __init__(self, columns, target, backward_steps, forward_steps,
+    def __init__(self, variables, target, backward_steps, forward_steps,
                  scale=False, shuffle=True, random_state=None):
         self.steps = [
-            (_select, {"columns": columns + [target]}, False),
+            (_select, {"columns": variables + [target]}, False),
             (
                 add_lags, {
                     "lags": backward_steps, "forward": False, 
-                    "trim": True, "subset": columns, 
+                    "trim": True, "subset": variables, 
                     "return_cols": False},
                 False),
             (
@@ -74,7 +80,9 @@ class LagDataPipe(DataPipe):
                     "return_cols": True},
                 False),
             (_shuffle, {"random_state": random_state, "shuffle": shuffle}, False),
-            (_split_and_drop, {"drop_columns": [target]}, False) ,
+            (_split_and_drop, {"drop_columns": [target]}, False),
+            (_get_feature_names, {}, False),
+            (_as_numpy, {}, False)
         ]
         if scale: self.steps.append( (_StandardScalerXY(), {}, True))
         

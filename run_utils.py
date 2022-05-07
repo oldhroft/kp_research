@@ -3,6 +3,8 @@ import joblib
 
 from pandas import DataFrame, read_csv
 from pandas import get_dummies
+from numpy import array
+
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import RidgeClassifier
@@ -23,6 +25,8 @@ except ImportError:
 from scripts.helpers.preprocess import preprocess_3h
 from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix, create_folder
 from scripts.helpers.utils_nn import get_sequential_model
+
+from scripts.pipeline.data_pipe import LagDataPipe
 
 MODEL_DICT = {
     'xgboost': XGBClassifier(),
@@ -54,6 +58,13 @@ def read_data(val=False):
     else:
         return df_train.reset_index(), df_test.reset_index(), categories
 
+from importlib import import_module
+
+def get_data_pipeline(config, model_name):
+    cls = getattr(import_module('scripts.pipeline.data_pipe'), 
+                  config['pipe_name'][model_name])
+    return cls(**config['pipe_params'][model_name])
+
 def create_folder_structure(root):
     matrix_path = os.path.join(root, 'matrix')
     model_path = os.path.join(root, 'models')
@@ -84,15 +95,15 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
     
     models = []
     histories = {}
-    y_train = DataFrame(y_train)
-    for col in y_train.columns:
+
+    for col in range(y_train.shape[1]):
         set_seed(seed)
-        y_dummy = get_dummies(y_train[col])
+        y_dummy = array(get_dummies(y_train[:, col]))
         model = NN_MODEL_DICT[model_name](input_shape, n_classes, **init_params)
         callbacks_list = [
             callbacks.EarlyStopping(**callback_params),
         ]
-        history = model.fit(X_train.values, y_dummy.values, 
+        history = model.fit(X_train, y_dummy, 
                             callbacks=callbacks_list, **fit_params)
         models.append(model)
         histories[col] = history
@@ -101,7 +112,6 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
 
 def score(model, model_name, X_test, y_test, structure, proc_name):
     preds = model.predict(X_test)
-    preds = DataFrame(preds)
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average='macro')
     fname = os.path.join(structure['root'], f'{proc_name}_{model_name}_f1.csv')
     f1_macro_res.to_csv(fname)
@@ -112,9 +122,9 @@ def score(model, model_name, X_test, y_test, structure, proc_name):
 
 def score_keras(model, model_name, X_test, y_test, structure, proc_name):
     preds= {}
-    y_test = DataFrame(y_test)
-    for i, col in enumerate(y_test.columns):
-        preds[col] = model[i].predict(X_test.values).argmax(axis=1)
+
+    for i in range(y_test.shape[1]):
+        preds[i] = model[i].predict(X_test).argmax(axis=1)
     preds = DataFrame(preds)
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average='macro')
     fname = os.path.join(structure['root'], f'{proc_name}_{model_name}_f1.csv')

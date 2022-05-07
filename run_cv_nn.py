@@ -6,10 +6,9 @@ from sklearn.metrics import f1_score
 
 from scripts.helpers.utils import validate_keras_cv
 from scripts.helpers.logging_utils import config_logger, create_argparser
-from scripts.pipeline.data_pipe import LagDataPipe
 
-from run_utils import fit_keras, save_history, score_keras, read_data, NN_MODEL_DICT
-from run_utils import create_folder_structure, save_model_keras
+from run_utils import fit_keras, get_data_pipeline, save_history, score_keras, read_data, NN_MODEL_DICT
+from run_utils import create_folder_structure, save_model_keras, get_data_pipeline
 
 PROC_NAME = 'nnruncv'
 
@@ -26,12 +25,6 @@ if __name__ == '__main__':
         config = json.load(file)
 
     df_train, df_test, categories = read_data()
-    data_pipeline = LagDataPipe(config['variables'], 'category', 24, 24 // 3, scale=True,
-                                shuffle=True, random_state=config['random_state'])
-    X_train, y_train = data_pipeline.fit_transform(df_train)
-    X_test, y_test = data_pipeline.transform(df_test)
-
-    shape = (X_train.shape[1], )
 
     config['best_params'] = {}
     for model_name, _ in NN_MODEL_DICT.items():
@@ -40,11 +33,20 @@ if __name__ == '__main__':
         if not arguments.dummy and model_name == 'dummy':
             continue
 
+        logger.info(f'Data processing for {model_name}')
+        data_pipeline = get_data_pipeline(config, model_name)
+        X_train, y_train, features = data_pipeline.fit_transform(df_train)
+        X_test, y_test, features = data_pipeline.transform(df_test)
+        logger.info(f'X_train shape {X_train.shape}')
+        logger.info(f'X_test shape {X_test.shape}')
+
+        shape = X_train.shape[1: ]
+
         logger.info(f'Grid search model, {model_name}')
         best_params, best_score = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
                                                     len(categories), config['cv_params'],
                                                     config['param_grids'][model_name],
-                                                    f1_score, X_train, y_train.iloc[:, 0],
+                                                    f1_score, X_train, y_train[:, 0],
                                                     config['callback_params'][model_name],
                                                     config['scoring_params'], 
                                                     config['init_params'][model_name],

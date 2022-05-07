@@ -10,7 +10,8 @@
         },
         "ridge": {
             "ridgeclassifier__random_state": 17
-        }
+        },
+        "dummy": {}
     },
     "param_grids": {
         "ridge": {
@@ -23,15 +24,28 @@
         "xgboost": {
             "max_depth": [2, 4, 6, 8, 10],
             "n_estimators":  [50, 100, 150, 200, 250, 300]
-        }
+        },
+        "dummy": {}
     },
-    "variables": [
-        "Kp*10", "Dst", "B_x", "B_gsm_y", "B_gsm_z", 
-        "B_magn", "SW_spd", "H_den_SWP", "doySin", "hourSin",
-        "doyCos", "hourCos"
-    ],
     "gv_params": {
         "verbose": 1,
         "scoring": "f1_macro"
+    },
+    "pipe_name": {
+        "default": "LagDataPipe"
+    },
+    "pipe_params": {
+        "default": {
+            "variables": [
+                "Kp*10", "Dst", "B_x", "B_gsm_y", "B_gsm_z", 
+                "B_magn", "SW_spd", "H_den_SWP", "doySin", "hourSin",
+                "doyCos", "hourCos"],
+            "scale": false,
+            "shuffle": false,
+            "target": "category",
+            "backward_steps": 24, 
+            "forward_steps": 8,
+            "random_state": 16
+        }
     }
 }
