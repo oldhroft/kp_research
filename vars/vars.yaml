@@ -1,4 +1,4 @@
-default:
+default: &default
   pipe_name: LagDataPipe
   pipe_params:
     backward_steps: 24
@@ -22,19 +22,22 @@ default:
     - hourCos
 
 dummy:
+  <<: *default
   init_params: {}
 
 randomforest:
+  <<: *default
   init_params:
     n_jobs: -1
     random_state: 17
 
 ridge:
+  <<: *default
   init_params:
-    n_jobs: -1
-    random_state: 17
+    ridgeclassifier__random_state: 17
 
 xgboost:
+  <<: *default
   init_params:
     n_jobs: -1
     random_state: 17

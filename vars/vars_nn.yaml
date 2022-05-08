@@ -44,6 +44,7 @@ reccurent_setup: &reccurent_setup
 
 # Models definition
 perceptron:
+  <<: *default
   callback_params:
     <<: *default_callback
   fit_params:
@@ -56,16 +57,15 @@ perceptron:
     - 10
     - 10
   pipe_name: LagDataPipe
-  <<: *default
 
 gru:
+  <<: *default
   callback_params:
     <<: *default_callback
   <<: *reccurent_setup
-  <<: *default
 
 lstm:
+  <<: *default
   callback_params:
     <<: *default_callback
   <<: *reccurent_setup
-  <<: *default

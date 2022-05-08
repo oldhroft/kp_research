@@ -1,5 +1,7 @@
 import os
 import joblib
+import yaml
+from datetime import datetime
 
 from pandas import DataFrame, read_csv
 from pandas import get_dummies
@@ -62,20 +64,22 @@ def read_data(val=False):
 
 from importlib import import_module
 
-def get_data_pipeline(config, model_name):
+def get_data_pipeline(config):
     cls = getattr(import_module('scripts.pipeline.data_pipe'), 
-                  config['pipe_name'][model_name])
-    return cls(**config['pipe_params'][model_name])
+                  config['pipe_name'])
+    return cls(**config['pipe_params'])
 
 def create_folder_structure(root):
     matrix_path = os.path.join(root, 'matrix')
     model_path = os.path.join(root, 'models')
     history_path = os.path.join(root, 'history')
+    vars_path = os.path.join(root, 'vars')
     create_folder(root)
     create_folder(matrix_path)
     create_folder(model_path)
     create_folder(history_path)
-    structure = dict(root=root, model_path=model_path, 
+    create_folder(vars_path)
+    structure = dict(root=root, model_path=model_path, vars=vars_path,
                      matrix_path=matrix_path, history_path=history_path)
     return structure
 
@@ -154,3 +158,9 @@ def save_model_keras(model, model_name: str, structure: str, proc_name: str,):
         filename = os.path.join(structure['model_path'], 
                                 f'{proc_name}_{model_name}_{i}_model')
         model_.save(filename)
+
+def save_vars(config: dict, proc_name: str, model_name: str, structure: dict) -> None:
+    config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    with open(os.path.join(structure["vars"], f'vars_{proc_name}_{model_name}.yaml'),
+            'w', encoding='utf-8') as file:
+        yaml.dump(config, file)    
