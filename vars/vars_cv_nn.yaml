@@ -1,0 +1,81 @@
+default: &default
+  cv_params:
+    n_splits: 5
+    random_state: null
+    shuffle: false
+  gcv_params:
+    scoring: f1_macro
+    verbose: 2
+  scoring_params:
+    average: macro
+  seed: 16
+  pipe_params:
+    backward_steps: 24
+    forward_steps: 8
+    random_state: 16
+    scale: false
+    shuffle: false
+    target: category
+    variables:
+    - Kp*10
+    - Dst
+    - B_x
+    - B_gsm_y
+    - B_gsm_z
+    - B_magn
+    - SW_spd
+    - H_den_SWP
+    - doySin
+    - hourSin
+    - doyCos
+    - hourCos
+
+default_callback: &default_callback
+  monitor: val_loss
+  patience: 10
+  restore_best_weights: true
+
+# Variable definition for reccurent models
+reccurent_setup: &reccurent_setup
+  fit_params:
+    epochs: 1
+    validation_split: 0.1
+    verbose: 2
+  init_params:
+    optimizer: adam
+  param_grids:
+    units_array:
+    - dense:
+      - 32
+      - 16
+      rnn:
+      - 32
+  pipe_name: SequenceDataPipe
+
+# Models definition
+perceptron:
+  callback_params:
+    <<: *default_callback
+  fit_params:
+    epochs: 2
+    validation_split: 0.1
+    verbose: 2
+  init_params:
+    optimizer: adam
+  param_grids:
+    units_array:
+    - - 16
+  pipe_name: LagDataPipe
+  <<: *default
+
+gru:
+  callback_params:
+    <<: *default_callback
+  <<: *reccurent_setup
+  <<: *default
+
+lstm:
+  callback_params:
+    <<: *default_callback
+  <<: *reccurent_setup
+  <<: *default

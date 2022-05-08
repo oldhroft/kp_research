@@ -1,0 +1,73 @@
+default: &default
+  cv_params:
+    n_splits: 5
+    random_state: null
+    shuffle: false
+  gv_params:
+    scoring: f1_macro
+    verbose: 1
+  pipe_name:  LagDataPipe
+  pipe_params:
+    backward_steps: 24
+    forward_steps: 8
+    random_state: 16
+    scale: false
+    shuffle: false
+    target: category
+    variables:
+    - Kp*10
+    - Dst
+    - B_x
+    - B_gsm_y
+    - B_gsm_z
+    - B_magn
+    - SW_spd
+    - H_den_SWP
+    - doySin
+    - hourSin
+    - doyCos
+    - hourCos
+
+# Variable definiton for ensemble tree models
+ensemble_grid: &ensemble_grid
+  param_grids:
+    max_depth:
+    - 2
+    - 4
+    - 6
+    - 8
+    - 10
+    n_estimators:
+    - 50
+    - 100
+    - 150
+    - 200
+    - 250
+    - 300
+
+# Model definition
+dummy:
+  <<: *default
+  init_params: {}
+  param_grids: {}
+
+randomforest:
+  <<: *default
+  init_params:
+    n_jobs: -1
+    random_state: 17
+  <<: *ensemble_grid
+
+ridge:
+  <<: *default
+  init_params:
+    ridgeclassifier__random_state: 17
+  param_grids:
+    ridgeclassifier__alpha:
+    - 0.1
+    - 1
+    - 10
+    - 20
+    - 40
+    - 80
+    - 100
