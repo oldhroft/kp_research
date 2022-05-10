@@ -3,7 +3,7 @@ import os
 import yaml
 from typing import Any, IO
 
-class Loader(yaml.SafeLoader):
+class Loader(yaml.SafeLoader): #pragma: no cover
     """YAML Loader with `!include` constructor."""
 
     def __init__(self, stream: IO) -> None:
@@ -28,7 +28,7 @@ def construct_include(loader: Loader, node: yaml.Node) -> Any:
         else:
             return ''.join(f.readlines())
 
-yaml.add_constructor('!include', construct_include, Loader)
+yaml.add_constructor('!include', construct_include, Loader) # pragma: no cover
 
 def load_yaml(file: str) -> dict:
 
