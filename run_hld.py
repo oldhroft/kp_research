@@ -1,4 +1,3 @@
-from datetime import datetime
 import os
 import yaml
 import logging
@@ -11,7 +10,7 @@ from scripts.helpers.logging_utils import config_logger, create_argparser
 from run_utils import fit, get_data_pipeline, score, read_data, MODEL_DICT, save_model
 from run_utils import create_folder_structure, save_vars
 
-PROC_NAME = 'skrunhld'
+PROC_NAME = os.path.basename(__file__).split('.')[0]
 
 if __name__ == '__main__':
 
@@ -20,8 +19,9 @@ if __name__ == '__main__':
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
-    vars_path = 'vars/vars_hld.yaml' if arguments.vars is None else arguments.vars
 
+    vars_name = f'vars_{PROC_NAME}.yaml'
+    vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     with open(vars_path, 'r', encoding='utf-8') as file:
         config_global = yaml.safe_load(file)
 
