@@ -1,8 +1,8 @@
 import os
-import yaml
 import logging
 
 from scripts.helpers.logging_utils import config_logger, create_argparser
+from scripts.helpers.yaml_utils import load_yaml
 
 from run_utils import fit_keras, get_data_pipeline, save_history, read_data, NN_MODEL_DICT, score_keras
 from run_utils import create_folder_structure, save_model_keras, save_vars
@@ -19,8 +19,7 @@ if __name__ == '__main__':
 
     vars_name = f'vars_{PROC_NAME}.yaml'
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
-    with open(vars_path, 'r', encoding='utf-8') as file:
-        config_global = yaml.safe_load(file)
+    config_global = load_yaml(vars_path)
         
     df_train, df_test, categories = read_data()
 

@@ -1,25 +1,6 @@
 default: &default
   seed: 17
-  pipe_params:
-    backward_steps: 24
-    forward_steps: 8
-    random_state: 16
-    scale: true
-    shuffle: true
-    target: category
-    variables:
-    - Kp*10
-    - Dst
-    - B_x
-    - B_gsm_y
-    - B_gsm_z
-    - B_magn
-    - SW_spd
-    - H_den_SWP
-    - doySin
-    - hourSin
-    - doyCos
-    - hourCos
+  pipe_params: !include common/common_nn.yaml
 
 default_callback: &default_callback
   monitor: val_loss
