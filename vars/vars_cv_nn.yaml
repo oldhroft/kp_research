@@ -13,8 +13,8 @@ default: &default
     backward_steps: 24
     forward_steps: 8
     random_state: 16
-    scale: false
-    shuffle: false
+    scale: true
+    shuffle: true
     target: category
     variables:
     - Kp*10

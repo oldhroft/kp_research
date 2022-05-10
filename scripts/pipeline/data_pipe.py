@@ -99,7 +99,7 @@ class SequenceDataPipe(LagDataPipe):
                  scale=False, shuffle=True, random_state=None):
         
         super().__init__(variables, target, backward_steps, forward_steps,
-                         scale=False, shuffle=True, random_state=None)
+                         scale=scale, shuffle=shuffle, random_state=random_state)
         
         self.steps.extend([
             (
