@@ -1,0 +1,3 @@
+test:
+  import: !include test1.yaml
+  value: 1

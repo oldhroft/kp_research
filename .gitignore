@@ -9,3 +9,4 @@ test_run
 *.ipynb
 .ipynb_checkpoints
 .pytest_cache
+htmlcov

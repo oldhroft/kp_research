@@ -1,0 +1,23 @@
+rnn:
+  init_params:
+    optimizer: adam
+    input_shape:
+    - 25
+    - 12
+    n_classes: 3
+    units_array:
+      dense:
+      - 32
+      - 16
+      rnn:
+      - 32
+perceptron:
+  init_params:
+    input_shape:
+    - 25
+    - 12
+    n_classes: 3
+    optimizer: adam
+    units_array:
+    - 10
+    - 10
