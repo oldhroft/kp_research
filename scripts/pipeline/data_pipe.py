@@ -21,45 +21,9 @@ class DataPipe(object):
             X = step(X, **arg)
         return X
 
-from sklearn.preprocessing import StandardScaler
-from pandas import DataFrame
-from numpy import array
-from ..helpers.utils import add_lags 
-
-def _select(df: DataFrame, columns: list) -> DataFrame:
-    return df.loc[:, columns]
-
-def _split_and_drop(data_tuple: tuple, drop_columns) -> tuple:
-    df = data_tuple[0]
-    y_columns = data_tuple[1]
-    return df.drop(y_columns + drop_columns, axis=1), df.loc[:, y_columns]
-
-def _get_feature_names(data_tuple: tuple,) -> tuple:
-    return data_tuple[0], data_tuple[1], data_tuple[0].columns
-    
-def _shuffle(data_tuple: tuple, shuffle: bool, random_state: int) -> DataFrame:
-    if shuffle:
-        X = data_tuple[0]
-        cols = data_tuple[1]
-        return X.sample(frac=1., random_state=random_state), cols
-    else:
-        return data_tuple
-
-def _as_numpy(data_tuple: tuple) -> tuple:
-    return tuple(map(array, data_tuple))
-
-class _StandardScalerXY(StandardScaler):
-    
-    def fit(self, data_tuple: tuple):
-        return super().fit(data_tuple[0])
-    
-    def transform(self, data_tuple: tuple, ):
-        X_scaled = super().transform(data_tuple[0])
-        return tuple([X_scaled, *data_tuple[1: ]])
-    
-    def fit_transform(self, data_tuple: tuple):
-        return self.fit(data_tuple).transform(data_tuple)
-
+from ..helpers.utils import add_lags
+from scripts.pipeline.preprocess import _as_numpy, _get_feature_names, _select, _shuffle, _split_and_drop
+from scripts.pipeline.preprocess import _StandardScalerXY
 
 class LagDataPipe(DataPipe):
 
@@ -86,13 +50,7 @@ class LagDataPipe(DataPipe):
         ]
         if scale: self.steps.append( (_StandardScalerXY(), {}, True))
 
-def _reshape(data_tuple, n_features, time_steps):
-    X = data_tuple[0].reshape((-1, time_steps, n_features))
-    y = data_tuple[1]
-    return X, y
-    
-def _pack_with_array(data_tuple, array):
-    return tuple((*data_tuple, array))
+from scripts.pipeline.preprocess import _reshape, _pack_with_array
 
 class SequenceDataPipe(LagDataPipe):
     

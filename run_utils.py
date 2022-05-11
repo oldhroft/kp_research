@@ -24,11 +24,10 @@ except ImportError:
     from tensorflow import random as random
     set_seed = random.set_seed
 
-from scripts.helpers.preprocess import preprocess_3h
+from scripts.pipeline.preprocess import preprocess_3h
 from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix, create_folder
 from scripts.models.models import *
 
-from scripts.pipeline.data_pipe import LagDataPipe
 
 MODEL_DICT = {
     'xgboost': XGBClassifier(),

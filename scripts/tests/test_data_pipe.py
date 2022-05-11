@@ -2,10 +2,9 @@ from turtle import shape
 from pandas import read_csv
 
 from scripts.pipeline.data_pipe import *
-from scripts.pipeline.data_pipe import _select, _split_and_drop, _shuffle, _as_numpy
-from scripts.pipeline.data_pipe import _reshape, _pack_with_array
+from scripts.pipeline.preprocess import _select
 
-from scripts.helpers.preprocess import preprocess_3h
+from scripts.pipeline.preprocess import preprocess_3h
 
 DF = read_csv('scripts/tests/test_data/test.csv').pipe(preprocess_3h)
 
@@ -17,42 +16,6 @@ def test_simple_pipe():
     result = pipe.fit_transform(DF)
 
     assert result.shape == (DF.shape[0], 3)
-
-class TestDataBlocks:
-
-    def test__select(self):
-        df = _select(DF, ['Kp*10', 'doyCos', 'doySin'])
-        assert str(df.columns.tolist()) == str(['Kp*10', 'doyCos', 'doySin'])
-    
-    def test__shuffle(self):
-        df, cols = _shuffle((DF, []), shuffle=True, random_state=18)
-        assert df.shape == DF.shape
-    
-    def test__split_and_drop(self):
-        X, y = _split_and_drop((DF, ['Kp*10', 'doyCos', 'doySin']), drop_columns=['hourCos'])
-        assert 'hourCos' not in X.columns
-        assert 'doyCos' in y.columns
-        assert X.shape[1] == DF.shape[1] - 4
-    
-    def test__as_numpy(self):
-        df = _as_numpy((DF,))
-        assert df[0].shape == DF.shape
-    
-    def test__reshape(self):
-        data_tuple = _split_and_drop((DF, ['Kp*10', 'doyCos', 'doySin']), 
-                                     drop_columns=['hourCos'])
-        data_tuple =  data_tuple[0].iloc[:, :12].values, data_tuple[1]
-        
-        reshaped_data_tuple = _reshape(data_tuple, 3, 4)
-        assert reshaped_data_tuple[0].shape[1:] == (4, 3)
-    
-    def test__pack_with_array(self):
-        data_tuple = _split_and_drop((DF, ['Kp*10', 'doyCos', 'doySin']), 
-                                     drop_columns=['hourCos'])
-        data_tuple =  data_tuple[0].iloc[:, :12], data_tuple[1]
-        
-        packed = _pack_with_array(data_tuple, ['Kp*10', 'doyCos', 'doySin'])
-        assert len(packed) == 3
 
 from scripts.helpers.yaml_utils import load_yaml
 
