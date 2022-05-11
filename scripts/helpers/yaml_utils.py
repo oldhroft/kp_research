@@ -16,7 +16,7 @@ class Loader(yaml.SafeLoader): #pragma: no cover
 
         super().__init__(stream)
 
-def construct_include(loader: Loader, node: yaml.Node) -> Any:
+def construct_include(loader: Loader, node: yaml.Node) -> Any: # pragma: no cover
     """Include file referenced at node."""
 
     filename = os.path.abspath(os.path.join(loader._root, loader.construct_scalar(node)))

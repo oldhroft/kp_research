@@ -6,7 +6,7 @@ import os
 
 from .utils import create_folder
 
-class StreamToLogger(object):
+class StreamToLogger(object): # pragma: no cover
     """
     Fake file-like stream object that redirects writes to a logger instance.
     """
@@ -22,7 +22,7 @@ class StreamToLogger(object):
     def flush(self):
         pass
 
-def config_logger(logger, proc_name: str, folder: str):
+def config_logger(logger, proc_name: str, folder: str) -> None:
 
     handler = logging.StreamHandler(sys.stdout)
 
@@ -43,8 +43,8 @@ def config_logger(logger, proc_name: str, folder: str):
     sys.stderr = StreamToLogger(logger, logging.ERROR)
 
 from argparse import ArgumentParser
-# TODO: add --vars and --save-model argument
-def create_argparser() -> ArgumentParser:
+
+def create_argparser() -> ArgumentParser: # pragma: no cover
     parser = ArgumentParser()
 
     parser.add_argument('--folder', action='store', type=str, required=True)

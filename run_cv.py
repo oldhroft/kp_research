@@ -60,17 +60,3 @@ if __name__ == '__main__':
             save_model(model, model_name, structure, PROC_NAME)
         save_vars(config, PROC_NAME, model_name, structure)
  
-
-
-            
-
-
-
-
-
-
-        
-
-
-
-

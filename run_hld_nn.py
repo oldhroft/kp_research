@@ -83,17 +83,3 @@ if __name__ == '__main__':
 
         save_vars(config, PROC_NAME, model_name, structure)
  
-
-
-            
-
-
-
-
-
-
-        
-
-
-
-
