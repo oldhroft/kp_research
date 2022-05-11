@@ -90,6 +90,7 @@ def _reshape(data_tuple, n_features, time_steps):
     X = data_tuple[0].reshape((-1, time_steps, n_features))
     y = data_tuple[1]
     return X, y
+    
 def _pack_with_array(data_tuple, array):
     return tuple((*data_tuple, array))
 
@@ -109,9 +110,3 @@ class SequenceDataPipe(LagDataPipe):
                 }, False),
             (_pack_with_array, {"array": variables}, False)
         ])
-
-
-
-    
-
-        

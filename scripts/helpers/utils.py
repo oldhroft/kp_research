@@ -88,7 +88,7 @@ def columnwise_score(scoring_func: FunctionType,
     true_df = DataFrame(true_df)
     for (column_pred, y_pred), (columns_true, y_true) in zip(preds_df.iteritems(), 
                                                              true_df.iteritems()):
-        score.loc[column_pred] = scoring_func(y_pred, y_true, **kwargs)
+        score.loc[column_pred] = scoring_func(y_true, y_pred, **kwargs)
     
     return score
 
