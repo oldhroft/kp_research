@@ -39,6 +39,13 @@ randomforest:
     random_state: 17
   <<: *ensemble_grid
 
+xgboost:
+  <<: *default
+  init_params:
+    n_jobs: -1
+    random_state: 17
+  <<: *ensemble_grid
+
 ridge:
   <<: *default
   init_params:

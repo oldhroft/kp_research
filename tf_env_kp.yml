@@ -172,4 +172,3 @@ dependencies:
   - zipp=3.7.0=pyhd3eb1b0_0
   - zlib=1.2.12=h4dc903c_2
   - zstd=1.4.9=h322a384_0
-prefix: /Users/17518516/.conda/envs/tf

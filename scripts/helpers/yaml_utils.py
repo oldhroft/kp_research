@@ -36,4 +36,6 @@ def load_yaml(file: str) -> dict:
         data = yaml.load(file, Loader)
     
     return data
-    
+
+def dict_to_yaml_str(obj: dict) -> str:
+    return '\n' + yaml.dump(obj)
