@@ -8,3 +8,9 @@ def test_simple_yaml_load():
 def test_include_yaml():
     data = load_yaml("scripts/tests/test_yamls/test2.yaml")
     assert data['test']['import']['test']['value1'] == 1, "Yaml !include option does not work"
+
+def test_dict_to_yaml_str():
+    test_dct = {"key": "value"}
+    answer = '\nkey: value\n'
+    string = dict_to_yaml_str(test_dct)
+    assert string == answer
