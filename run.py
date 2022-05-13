@@ -5,7 +5,7 @@ from scripts.helpers.logging_utils import config_logger, create_argparser
 
 from run_utils import get_data_pipeline, save_model,  score, read_data, MODEL_DICT, fit
 from run_utils import create_folder_structure, save_vars
-from scripts.helpers.yaml_utils import load_yaml
+from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
@@ -36,8 +36,10 @@ if __name__ == '__main__':
         if arguments.model is not None and arguments.model != model_name:
             continue
         if not arguments.dummy and model_name == 'dummy':
-            continue        
+            continue
         config = config_global[model_name]
+        logger.info(f'Model {model_name}, params:')
+        logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}
 
         logger.info(f'Fitting model, {model_name}')

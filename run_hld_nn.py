@@ -6,7 +6,7 @@ from sklearn.metrics import f1_score
 
 from scripts.helpers.utils import validate_keras
 from scripts.helpers.logging_utils import config_logger, create_argparser
-from scripts.helpers.yaml_utils import load_yaml
+from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 
 from run_utils import fit_keras, get_data_pipeline, save_history, save_model_keras, score_keras, read_data, NN_MODEL_DICT
 from run_utils import create_folder_structure, save_model_keras, save_vars
@@ -33,6 +33,8 @@ if __name__ == '__main__':
         if not arguments.dummy and model_name == 'dummy':
             continue
         config = config_global[model_name]
+        logger.info(f'Model {model_name}, params:')
+        logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}
 
         logger.info(f'Data processing for {model_name}')
