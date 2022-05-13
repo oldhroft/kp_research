@@ -4,13 +4,13 @@ default: &default
 
 default_callback: &default_callback
   monitor: val_loss
-  patience: 10
+  patience: 3
   restore_best_weights: true
 
 # Variable definition for reccurent models
 reccurent_setup: &reccurent_setup
   fit_params:
-    epochs: 1
+    epochs: 18
     validation_split: 0.1
     verbose: 2
   init_params:
@@ -20,7 +20,7 @@ reccurent_setup: &reccurent_setup
       - 32
       - 16
       rnn:
-      - 32
+      - 16
   pipe_name: SequenceDataPipe
 
 # Models definition
@@ -29,7 +29,7 @@ perceptron:
   callback_params:
     <<: *default_callback
   fit_params:
-    epochs: 2
+    epochs: 18
     validation_split: 0.1
     verbose: 2
   init_params:
