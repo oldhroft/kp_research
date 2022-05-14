@@ -1,11 +1,12 @@
 import os
 import logging
+from unittest import result
 
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 
 from run_utils import fit, get_data_pipeline, score, read_data, MODEL_DICT, save_model
-from run_utils import create_folder_structure, grid_search, save_vars
+from run_utils import create_folder_structure, grid_search, save_vars, save_cv_results
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
@@ -41,11 +42,13 @@ if __name__ == '__main__':
         config['best_params'] = {}
 
         logger.info(f'Grid search model, {model_name}')
-        best_params, best_score = grid_search(config['param_grids'],
-                                              model_name,
-                                              config['init_params'],
-                                              X_train, y_train[:, 0], 
-                                              config['cv_params'], config['gcv_params'])
+        best_params, best_score, results = grid_search(config['param_grids'],
+                                                       model_name,
+                                                       config['init_params'],
+                                                       X_train, y_train[:, 0], 
+                                                       config['cv_params'], 
+                                                       config['gcv_params'])
+        save_cv_results(results, model_name, structure, PROC_NAME)
         config['best_params'] = best_params
         params = config['init_params'].copy()
         params.update(best_params)
