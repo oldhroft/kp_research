@@ -21,7 +21,7 @@ if __name__ == '__main__':
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     config_global = load_yaml(vars_path)
         
-    df_train, df_test, categories = read_data()
+    df_train, df_test, categories = read_data(arguments.data)
 
     for model_name, _ in NN_MODEL_DICT.items():
         if arguments.model is not None and arguments.model != model_name:

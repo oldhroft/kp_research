@@ -42,10 +42,12 @@ NN_MODEL_DICT = {
     "gru": get_gru_model,
 }
 
-def read_data(val=False):
+def read_data(path, val=False):
+    if path is None:
+        path = './data/All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv'
+        
     df = read_csv(
-        './data/All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv', 
-        encoding='cp1251', na_values='N').pipe(preprocess_3h)
+        path, encoding='cp1251', na_values='N').pipe(preprocess_3h)
     
     categories = list(df.category.unique())
 
