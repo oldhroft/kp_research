@@ -2,8 +2,9 @@ import logging
 import os
 
 from scripts.helpers.logging_utils import config_logger, create_argparser
+from scripts.models.models import MODEL_DICT
 
-from run_utils import get_data_pipeline, save_model,  score, read_data, MODEL_DICT, fit
+from run_utils import get_data_pipeline, save_model,  score, read_data, fit
 from run_utils import create_folder_structure, save_vars
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 

@@ -45,4 +45,24 @@ def get_gru_model(input_shape, n_classes, units_array, optimizer, ):
     model.compile(loss='categorical_crossentropy', optimizer=optimizer)
     return model
 
+NN_MODEL_DICT = {
+    'perceptron': get_sequential_model,
+    'lstm': get_lstm_model,
+    "gru": get_gru_model,
+}
+
+from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import RidgeClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.dummy import DummyClassifier
+
+MODEL_DICT = {
+    'xgboost': XGBClassifier(),
+    'randomforest': RandomForestClassifier(),
+    'ridge': make_pipeline(StandardScaler(), RidgeClassifier()),
+    'dummy': DummyClassifier(strategy='most_frequent'),
+}
+
         

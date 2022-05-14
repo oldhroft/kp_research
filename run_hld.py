@@ -6,8 +6,9 @@ from pandas import concat
 from scripts.helpers.utils import validate
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
+from scripts.models.models import MODEL_DICT
 
-from run_utils import fit, get_data_pipeline, score, read_data, MODEL_DICT, save_model
+from run_utils import fit, get_data_pipeline, score, read_data, save_model
 from run_utils import create_folder_structure, save_vars, save_cv_results
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]

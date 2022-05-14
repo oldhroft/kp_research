@@ -7,14 +7,9 @@ from pandas import DataFrame, read_csv
 from pandas import get_dummies
 from numpy import array
 
-from xgboost import XGBClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import RidgeClassifier
+
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import f1_score
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 from tensorflow.keras import callbacks as callbacks
@@ -27,20 +22,6 @@ except ImportError:
 from scripts.pipeline.preprocess import preprocess_3h
 from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix, create_folder
 from scripts.models.models import *
-
-
-MODEL_DICT = {
-    'xgboost': XGBClassifier(),
-    'randomforest': RandomForestClassifier(),
-    'ridge': make_pipeline(StandardScaler(), RidgeClassifier()),
-    'dummy': DummyClassifier(strategy='most_frequent')
-}
-
-NN_MODEL_DICT = {
-    'perceptron': get_sequential_model,
-    'lstm': get_lstm_model,
-    "gru": get_gru_model,
-}
 
 def read_data(path, val=False):
     if path is not None:
