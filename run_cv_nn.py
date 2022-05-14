@@ -7,7 +7,8 @@ from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 
 from run_utils import fit_keras, get_data_pipeline, save_history, score_keras, read_data, NN_MODEL_DICT
-from run_utils import create_folder_structure, save_model_keras, get_data_pipeline, save_vars
+from run_utils import create_folder_structure, get_data_pipeline
+from run_utils import save_vars, save_cv_results, save_model_keras
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
@@ -45,16 +46,16 @@ if __name__ == '__main__':
         shape = X_train.shape[1: ]
 
         logger.info(f'Grid search model, {model_name}')
-        best_params, best_score = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
-                                                    len(categories), config,
-                                                    config['param_grids'],
-                                                    f1_score, X_train, y_train[:, 0],
-                                                    config['callback_params'],
-                                                    config['scoring_params'], 
-                                                    config['init_params'],
-                                                    config['fit_params'],
-                                                    **config['gcv_params'])
-
+        best_params, best_score, results = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
+                                                             len(categories), config,
+                                                             config['param_grids'],
+                                                             f1_score, X_train, y_train[:, 0],
+                                                             config['callback_params'],
+                                                             config['scoring_params'], 
+                                                             config['init_params'],
+                                                             config['fit_params'],
+                                                             **config['gcv_params'])
+        save_cv_results(results, model_name, structure, PROC_NAME)
         config['best_params'] = best_params
         logger.info(f'Best params: {best_params}')
         logger.info(f'Best score: {best_score}')

@@ -129,6 +129,7 @@ def validate(model, params: list,
     best_param = None
 
     scorer = SCORERS[scoring]
+    results = []
 
     for param in _create_param_grid(params):
 
@@ -140,11 +141,12 @@ def validate(model, params: list,
         if score > best_score: 
             best_score = score
             best_param = param
+        results.append({**param, 'score': score})
 
         end_time = time.time()
         if verbose > 0: print(f'Param {param}, time {end_time - start_time:.2f}')
 
-    return best_score, best_param
+    return best_score, best_param, DataFrame(results)
 
 from pandas import Series, DataFrame
 from pandas import get_dummies
@@ -166,7 +168,7 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
     
     best_score = 0
     best_param = None
-
+    results = []
     for param in _create_param_grid(params):
         start_time = time.time()
         if seed is not None: set_seed(seed)
@@ -175,6 +177,7 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
         full_params.update(param)
         sub_scores = []
         cv = StratifiedKFold(**cv_params)
+        i = 0
         for train_idx, test_idx in cv.split(X, y):
             callbacks_list = [
                 callbacks.EarlyStopping(**callback_params),
@@ -187,7 +190,13 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
             model_param.fit(X_train, y_train, callbacks=callbacks_list,
                             **fit_params)
             y_preds = model_param.predict(X_test).argmax(axis=1)
-            sub_scores.append(scoring(y_preds, y_test, **scoring_params))
+            score = scoring(y_preds, y_test, **scoring_params)
+            sub_scores.append(score)
+            result_dict = {
+                **param, 'score': score, 'split': i
+            }
+            i += 1
+            results.append(result_dict)
         
         score = mean(sub_scores)
 
@@ -199,7 +208,7 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
         if verbose: print('Param {}, time {:.2f}'.format(param, 
                                                          end_time - start_time))
 
-    return best_param, best_score
+    return best_param, best_score, DataFrame(results)
 
 def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
                    params: dict, scoring: FunctionType,
@@ -211,6 +220,8 @@ def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
     
     best_score = 0
     best_param = None
+
+    results = []
 
     for param in _create_param_grid(params):
 
@@ -236,8 +247,10 @@ def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
             best_score = score
             best_param = param
 
+        results.append({**param, 'score': score})
+
         end_time = time.time()
         if verbose: print('Param {}, time {:.2f}'.format(param, 
                                                          end_time - start_time))
 
-    return best_param, best_score
+    return best_param, best_score, DataFrame(results)

@@ -68,19 +68,32 @@ def get_data_pipeline(config):
                   config['pipe_name'])
     return cls(**config['pipe_params'])
 
-def create_folder_structure(root):
-    matrix_path = os.path.join(root, 'matrix')
-    model_path = os.path.join(root, 'models')
-    history_path = os.path.join(root, 'history')
-    vars_path = os.path.join(root, 'vars')
-    create_folder(root)
-    create_folder(matrix_path)
-    create_folder(model_path)
-    create_folder(history_path)
-    create_folder(vars_path)
-    structure = dict(root=root, model_path=model_path, vars=vars_path,
-                     matrix_path=matrix_path, history_path=history_path)
+def create_folder_structure(root: str) -> dict:
+
+    structure = {'root': root}
+    for sub_folder in ['matrix', 'models', 'history', 'vars','cv_results']:
+        path = os.path.join(root, sub_folder)
+        create_folder(path)
+        structure[sub_folder] = path
+
     return structure
+
+def _convert_to_results(gcv: GridSearchCV) -> DataFrame:
+    cv_results = gcv.cv_results_
+    n_splits = gcv.n_splits_
+    
+    results = []
+    
+    for j, param in enumerate(cv_results['params']):
+        
+        for i in range(n_splits):
+            score = cv_results[f'split{i}_test_score'][j]
+            
+            results.append({
+                **param, 'score': score, 'split': i,
+            })
+    
+    return DataFrame(results)
 
 def grid_search(params, model_name, init_params, X_train, y_train, 
                 cv_params, gcv_params):
@@ -88,7 +101,10 @@ def grid_search(params, model_name, init_params, X_train, y_train,
     skf = StratifiedKFold(**cv_params)
     gcv = GridSearchCV(model, params, cv=skf, **gcv_params)
     gcv.fit(X_train, y_train)
-    return gcv.best_params_, gcv.best_score_
+
+    results = _convert_to_results(gcv)
+
+    return gcv.best_params_, gcv.best_score_, results
 
 def fit(model_name, params, X_train, y_train):
     model = MultiOutputClassifier(MODEL_DICT[model_name].set_params(**params))
@@ -138,6 +154,11 @@ def score_keras(model, model_name, X_test, y_test, structure, proc_name):
     for key, matrix in confusion_matrices.items():
         matrix.to_excel(
             os.path.join(structure['matrix_path'], f'{proc_name}_{model_name}_{key}.xlsx'))
+
+def save_cv_results(results: DataFrame, model_name: str, structure: str, proc_name: str,) -> None:
+    filename = os.path.join(structure['cv_results_path'], 
+                            f'{proc_name}_{model_name}_cv_results.csv')
+    results.to_csv(filename)
 
 def save_history(history, model_name: str, structure: str, proc_name: str,) -> None:
     for col, item in history.items():
