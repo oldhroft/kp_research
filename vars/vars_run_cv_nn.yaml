@@ -34,29 +34,30 @@ reccurent_setup: &reccurent_setup
   pipe_name: SequenceDataPipe
 
 # Models definition
-perceptron:
-  <<: *default
-  callback_params:
-    <<: *default_callback
-  fit_params:
-    epochs: 2
-    validation_split: 0.1
-    verbose: 2
-  init_params:
-    optimizer: adam
-  param_grids:
-    units_array:
-    - - 16
-  pipe_name: LagDataPipe
+models:
+- perceptron:
+    <<: *default
+    callback_params:
+      <<: *default_callback
+    fit_params:
+      epochs: 2
+      validation_split: 0.1
+      verbose: 2
+    init_params:
+      optimizer: adam
+    param_grids:
+      units_array:
+      - - 16
+    pipe_name: LagDataPipe
 
-gru:
-  <<: *default
-  callback_params:
-    <<: *default_callback
-  <<: *reccurent_setup
+- gru:
+    <<: *default
+    callback_params:
+      <<: *default_callback
+    <<: *reccurent_setup
 
-lstm:
-  <<: *default
-  callback_params:
-    <<: *default_callback
-  <<: *reccurent_setup
+- lstm:
+    <<: *default
+    callback_params:
+      <<: *default_callback
+    <<: *reccurent_setup

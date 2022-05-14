@@ -25,12 +25,13 @@ if __name__ == '__main__':
 
     df_train, df_test, categories = read_data(arguments.data)
     
-    for model_name, _ in NN_MODEL_DICT.items():
+    for model_name, config in config_global['models'].items():
+        
         if arguments.model is not None and arguments.model != model_name:
             continue
         if not arguments.dummy and model_name == 'dummy':
             continue
-        config = config_global[model_name]
+
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}

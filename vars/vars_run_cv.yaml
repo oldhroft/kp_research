@@ -27,35 +27,36 @@ ensemble_grid: &ensemble_grid
     - 300
 
 # Model definition
-dummy:
-  <<: *default
-  init_params: {}
-  param_grids: {}
+models:
+- dummy:
+    <<: *default
+    init_params: {}
+    param_grids: {}
 
-randomforest:
-  <<: *default
-  init_params:
-    n_jobs: -1
-    random_state: 17
-  <<: *ensemble_grid
+- randomforest:
+    <<: *default
+    init_params:
+      n_jobs: -1
+      random_state: 17
+    <<: *ensemble_grid
 
-xgboost:
-  <<: *default
-  init_params:
-    n_jobs: -1
-    random_state: 17
-  <<: *ensemble_grid
+- xgboost:
+    <<: *default
+    init_params:
+      n_jobs: -1
+      random_state: 17
+    <<: *ensemble_grid
 
-ridge:
-  <<: *default
-  init_params:
-    ridgeclassifier__random_state: 17
-  param_grids:
-    ridgeclassifier__alpha:
-    - 0.1
-    - 1
-    - 10
-    - 20
-    - 40
-    - 80
-    - 100
+- ridge:
+    <<: *default
+    init_params:
+      ridgeclassifier__random_state: 17
+    param_grids:
+      ridgeclassifier__alpha:
+      - 0.1
+      - 1
+      - 10
+      - 20
+      - 40
+      - 80
+      - 100

@@ -30,12 +30,12 @@ if __name__ == '__main__':
     logger.info(f'X_train shape {X_train.shape}')
     logger.info(f'X_test shape {X_test.shape}')
 
-    for model_name, _ in MODEL_DICT.items():
+    for model_name, config in config_global['models'].items():
         if arguments.model is not None and arguments.model != model_name:
             continue
         if not arguments.dummy and model_name == 'dummy':
             continue
-        config = config_global[model_name]
+
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}
@@ -51,7 +51,6 @@ if __name__ == '__main__':
         params.update(best_params)
         logger.info(f'Best params: {best_params}')
         logger.info(f'Best score: {best_score}')
-
 
         logger.info(f'Fitting model, {model_name}')
         model = fit(model_name, params, X_train, y_train)
