@@ -71,10 +71,11 @@ def get_data_pipeline(config):
 def create_folder_structure(root: str) -> dict:
 
     structure = {'root': root}
-    for sub_folder in ['matrix', 'models', 'history', 'vars','cv_results']:
+    create_folder(root)
+    for sub_folder in ['matrix', 'model', 'history', 'vars','cv_results']:
         path = os.path.join(root, sub_folder)
         create_folder(path)
-        structure[sub_folder] = path
+        structure[f'{sub_folder}_path'] = path
 
     return structure
 
@@ -181,6 +182,6 @@ def save_model_keras(model, model_name: str, structure: str, proc_name: str,):
 
 def save_vars(config: dict, proc_name: str, model_name: str, structure: dict) -> None:
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
-    with open(os.path.join(structure["vars"], f'vars_{proc_name}_{model_name}.yaml'),
+    with open(os.path.join(structure["vars_path"], f'vars_{proc_name}_{model_name}.yaml'),
             'w', encoding='utf-8') as file:
         yaml.dump(config, file)    
