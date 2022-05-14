@@ -24,7 +24,7 @@ if __name__ == '__main__':
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     config_global = load_yaml(vars_path)
 
-    df_train, df_test, df_val, categories = read_data(val=True)
+    df_train, df_test, df_val, categories = read_data(arguments.data, val=True)
 
     logger.info(f'Data processing...')
     data_pipeline =get_data_pipeline(config_global["default"])
