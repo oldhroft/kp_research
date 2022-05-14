@@ -41,18 +41,19 @@ if __name__ == '__main__':
     logger.info(f'X_test shape {X_test.shape}')
     logger.info(f'X_train_full shape {X_train_full.shape}')
 
-    for model_name, model in MODEL_DICT.items():
+    for model_name, config in config_global['models'].items():
+
         if arguments.model is not None and arguments.model != model_name:
             continue
         if not arguments.dummy and model_name == 'dummy':
             continue
-        config = config_global[model_name]
+
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}
 
         logger.info(f'Grid search model, {model_name}')
-        model = model.set_params(**config['init_params'])
+        model = MODEL_DICT[model_name].set_params(**config['init_params'])
         best_score, best_params, results = validate(model, config['param_grids'],
                                                     X_train, y_train[:, 0],
                                                     X_val, y_val[:, 0], **config['gv_params'])
