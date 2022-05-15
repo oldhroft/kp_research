@@ -1,8 +1,14 @@
 import os
+from typing import List
 
 def create_folder(name: str) -> None:
     if not os.path.exists(name):
         os.mkdir(name)
+
+def add_to_environ(data: List[str]) -> None:
+    for item in data:
+        key, value = item.split('=')
+        os.environ[key] = value
 
 def _choose_suffix_name(forward: bool, suffix_name: str) -> str:
     if suffix_name is not None:

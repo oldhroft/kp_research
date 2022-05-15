@@ -4,6 +4,7 @@ import logging
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 from scripts.models.models import NN_MODEL_DICT
+from scripts.helpers.utils import add_to_environ
 
 from run_utils import fit_keras, get_data_pipeline, save_history, read_data, score_keras
 from run_utils import create_folder_structure, save_model_keras, save_vars
@@ -14,6 +15,7 @@ if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
     structure = create_folder_structure(arguments.folder)
+    add_to_environ(arguments.conf)
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)

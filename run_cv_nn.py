@@ -2,7 +2,7 @@ import os
 import logging
 from sklearn.metrics import f1_score
 
-from scripts.helpers.utils import validate_keras_cv
+from scripts.helpers.utils import add_to_environ, validate_keras_cv
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 from scripts.models.models import NN_MODEL_DICT
@@ -17,6 +17,7 @@ if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
     structure = create_folder_structure(arguments.folder)
+    add_to_environ(arguments.conf)
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)

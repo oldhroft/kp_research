@@ -51,7 +51,7 @@ def create_argparser() -> ArgumentParser: # pragma: no cover
     parser.add_argument('--model', action='store', type=str, required=False, default=None)
     parser.add_argument('--vars', action='store', type=str, required=False, default=None)
     parser.add_argument('--data', action='store', type=str, required=False, default=None)
-    parser.add_argument('--conf', action='store', type=str, required=False, default=None)
+    parser.add_argument('--conf', nargs='+', default=[])
     parser.add_argument('--save_models', action='store_true')
     return parser
 
