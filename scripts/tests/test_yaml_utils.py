@@ -1,4 +1,3 @@
-
 import os
 from ..helpers.yaml_utils import *
 
@@ -31,6 +30,7 @@ class TestYamlLoad():
         os.environ['KEY'] = "[1, 2, 3]"
         data = load_yaml("scripts/tests/test_yamls/test_env.yaml")
         assert str(data['test']['key']) == str([1, 2, 3])
+        assert isinstance(data['test']['key'], list)
 
 def test_dict_to_yaml_str():
     test_dct = {"key": "value"}
