@@ -1,3 +1,4 @@
+from random import sample
 import pytest
 
 from ..helpers.utils import *
@@ -11,6 +12,16 @@ def test_create_folder():
     flag = os.path.exists('scripts/tests/test1')
     os.rmdir('scripts/tests/test1')
     assert flag, "Folder scripts/tests/test1 not created"
+
+def test_add_to_environ():
+    sample_conf = [
+        "folder=test_folder",
+        "variable=2"
+    ]
+
+    add_to_environ(sample_conf)
+    assert os.environ["folder"] == 'test_folder'
+    assert os.environ['variable'] == "2"
 
 def test__choose_suffix_name():
     assert _choose_suffix_name(True, 'future') == 'future', 'Unexpected suffix name'

@@ -4,7 +4,7 @@ import logging
 from pandas import concat
 from sklearn.metrics import f1_score
 
-from scripts.helpers.utils import validate_keras
+from scripts.helpers.utils import validate_keras, add_to_environ
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 from scripts.models.models import NN_MODEL_DICT
@@ -18,6 +18,7 @@ if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
     structure = create_folder_structure(arguments.folder)
+    add_to_environ(arguments.conf)
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
@@ -30,8 +31,6 @@ if __name__ == '__main__':
 
     for model_name, config in config_global['models'].items():
         if arguments.model is not None and arguments.model != model_name:
-            continue
-        if not arguments.dummy and model_name == 'dummy':
             continue
 
         logger.info(f'Model {model_name}, params:')

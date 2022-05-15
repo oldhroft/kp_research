@@ -3,6 +3,7 @@ import os
 
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.models.models import MODEL_DICT
+from scripts.helpers.utils import add_to_environ
 
 from run_utils import get_data_pipeline, save_model,  score, read_data, fit
 from run_utils import create_folder_structure, save_vars
@@ -14,6 +15,7 @@ if __name__ == '__main__':
 
     arguments = create_argparser().parse_args()
     structure = create_folder_structure(arguments.folder)
+    add_to_environ(arguments.conf)
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, arguments.folder)
@@ -36,8 +38,6 @@ if __name__ == '__main__':
     for model_name, config in config_global['models'].items():
 
         if arguments.model is not None and arguments.model != model_name:
-            continue
-        if not arguments.dummy and model_name == 'dummy':
             continue
 
         logger.info(f'Model {model_name}, params:')

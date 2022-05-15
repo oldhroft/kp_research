@@ -31,12 +31,19 @@ def construct_include(loader: Loader, node: yaml.Node) -> Any: # pragma: no cove
 import re
 path_matcher = re.compile(r'\$\{([^}^{]+)\}')
 
+from ast import literal_eval
+
 def path_constructor(loader, node):  # pragma: no cover
     ''' Extract the matched value, expand env variable, and replace the match '''
     value = node.value
     match = path_matcher.match(value)
     for item in path_matcher.findall(value):
         value = re.sub(path_matcher, os.environ.get(item), value, count=1)
+        try:
+            value = literal_eval(value)
+        except ValueError:
+            pass
+
     return value
 
 def load_yaml(file: str) -> dict:
