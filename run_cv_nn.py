@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
         logger.info(f'Grid search model, {model_name}')
         best_params, best_score, results = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
-                                                             len(categories), config,
+                                                             len(categories), config['cv_params'],
                                                              config['param_grids'],
                                                              f1_score, X_train, y_train[:, 0],
                                                              config['callback_params'],
