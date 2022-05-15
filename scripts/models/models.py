@@ -60,6 +60,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.dummy import DummyClassifier
 from sklearn.feature_selection import SelectFromModel
+from .column_estimator import ColumnEstimator
 
 MODEL_DICT = {
     'xgboost': XGBClassifier(),
@@ -76,7 +77,8 @@ MODEL_DICT = {
     'rf_lr': make_pipeline(
         SelectFromModel(RandomForestClassifier(random_state=17)),
         LogisticRegression()
-    )
+    ),
+    'columnestimator': ColumnEstimator()
 }
 
         
