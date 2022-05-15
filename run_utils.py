@@ -5,7 +5,7 @@ from datetime import datetime
 
 from pandas import DataFrame, read_csv
 from pandas import get_dummies
-from numpy import array
+from numpy import array, squeeze
 
 
 from sklearn.multioutput import MultiOutputClassifier
@@ -24,7 +24,7 @@ from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix,
 from scripts.models.models import *
 
 def read_data(path, val=False):
-    if path is not None:
+    if path is None:
         path = './data/All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv'
     df = read_csv(
         path, encoding='cp1251', na_values='N').pipe(preprocess_3h)
@@ -52,6 +52,7 @@ def get_data_pipeline(config):
 
 def create_folder_structure(root: str) -> dict:
 
+    os.environ['FOLDER'] = root
     structure = {'root': root}
     create_folder(root)
     for sub_folder in ['matrix', 'model', 'history', 'vars','cv_results']:
@@ -115,7 +116,7 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
     return models, histories
 
 def score(model, model_name, X_test, y_test, structure, proc_name):
-    preds = model.predict(X_test)
+    preds = squeeze(model.predict(X_test))
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average='macro')
     fname = os.path.join(structure['root'], f'{proc_name}_{model_name}_f1.csv')
     f1_macro_res.to_csv(fname)

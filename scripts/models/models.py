@@ -52,17 +52,31 @@ NN_MODEL_DICT = {
 }
 
 from xgboost import XGBClassifier
+from catboost import CatBoostClassifier
+from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import RidgeClassifier
+from sklearn.linear_model import RidgeClassifier, LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.dummy import DummyClassifier
+from sklearn.feature_selection import SelectFromModel
 
 MODEL_DICT = {
     'xgboost': XGBClassifier(),
     'randomforest': RandomForestClassifier(),
     'ridge': make_pipeline(StandardScaler(), RidgeClassifier()),
+    'lr': make_pipeline(StandardScaler(), LogisticRegression()),
     'dummy': DummyClassifier(strategy='most_frequent'),
+    'catboost': CatBoostClassifier(),
+    'lightgbm': LGBMClassifier(),
+    'rf_xgboost': make_pipeline(
+        SelectFromModel(RandomForestClassifier(random_state=17)),
+        XGBClassifier()
+    ),
+    'rf_lr': make_pipeline(
+        SelectFromModel(RandomForestClassifier(random_state=17)),
+        LogisticRegression()
+    )
 }
 
         

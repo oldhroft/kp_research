@@ -28,13 +28,25 @@ def construct_include(loader: Loader, node: yaml.Node) -> Any: # pragma: no cove
         else:
             return ''.join(f.readlines())
 
-yaml.add_constructor('!include', construct_include, Loader) # pragma: no cover
+import re
+path_matcher = re.compile(r'\$\{([^}^{]+)\}')
+
+def path_constructor(loader, node):  # pragma: no cover
+    ''' Extract the matched value, expand env variable, and replace the match '''
+    value = node.value
+    match = path_matcher.match(value)
+    for item in path_matcher.findall(value):
+        value = re.sub(path_matcher, os.environ.get(item), value, count=1)
+    return value
 
 def load_yaml(file: str) -> dict:
 
+    yaml.add_implicit_resolver('!path', path_matcher, None, Loader) # pragma: no cover
+    yaml.add_constructor('!path', path_constructor, Loader) # pragma: no cover
+    yaml.add_constructor('!include', construct_include, Loader) # pragma: no cover
+
     with open(file, 'r', encoding='utf-8', ) as file:
         data = yaml.load(file, Loader)
-    
     return data
 
 def dict_to_yaml_str(obj: dict) -> str:
