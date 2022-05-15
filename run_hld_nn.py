@@ -7,8 +7,9 @@ from sklearn.metrics import f1_score
 from scripts.helpers.utils import validate_keras
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
+from scripts.models.models import NN_MODEL_DICT
 
-from run_utils import fit_keras, get_data_pipeline, save_history, save_model_keras, score_keras, read_data, NN_MODEL_DICT
+from run_utils import fit_keras, get_data_pipeline, save_history, save_model_keras, score_keras, read_data
 from run_utils import create_folder_structure, save_model_keras, save_vars, save_cv_results
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
@@ -25,14 +26,14 @@ if __name__ == '__main__':
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     config_global = load_yaml(vars_path)
 
-    df_train, df_test, df_val, categories = read_data(val=True)
+    df_train, df_test, df_val, categories = read_data(arguments.data, val=True)
 
-    for model_name, model in NN_MODEL_DICT.items():
+    for model_name, config in config_global['models'].items():
         if arguments.model is not None and arguments.model != model_name:
             continue
         if not arguments.dummy and model_name == 'dummy':
             continue
-        config = config_global[model_name]
+
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}

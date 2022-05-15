@@ -2,8 +2,9 @@ import logging
 import os
 
 from scripts.helpers.logging_utils import config_logger, create_argparser
+from scripts.models.models import MODEL_DICT
 
-from run_utils import get_data_pipeline, save_model,  score, read_data, MODEL_DICT, fit
+from run_utils import get_data_pipeline, save_model,  score, read_data, fit
 from run_utils import create_folder_structure, save_vars
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     config_global = load_yaml(vars_path)
 
-    df_train, df_test, categories = read_data()
+    df_train, df_test, categories = read_data(arguments.data)
 
     logger.info(f'Data processing...')
     data_pipeline = get_data_pipeline(config_global["default"])
@@ -32,12 +33,13 @@ if __name__ == '__main__':
     logger.info(f'X_train shape {X_train.shape}')
     logger.info(f'X_test shape {X_test.shape}')
 
-    for model_name, _ in MODEL_DICT.items():
+    for model_name, config in config_global['models'].items():
+
         if arguments.model is not None and arguments.model != model_name:
             continue
         if not arguments.dummy and model_name == 'dummy':
             continue
-        config = config_global[model_name]
+
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}
