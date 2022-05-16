@@ -48,7 +48,7 @@ if __name__ == '__main__':
         X_test_full, y_test_full, features = data_pipeline.transform(df_test)
 
         shape = X_train.shape[1: ]
-
+        config['features'] = list(features)
         logger.info(f'X_train shape {X_train.shape}')
         logger.info(f'X_val shape {X_val.shape}')
         logger.info(f'X_test shape {X_test.shape}')

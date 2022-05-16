@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from pandas import concat, read_csv, DataFrame, Series
 
 from scripts.helpers.utils import create_folder
+from scripts.helpers.yaml_utils import load_yaml
 
 def create_argparser() -> ArgumentParser:
     parser = ArgumentParser()
@@ -24,19 +25,36 @@ def read_file(fname: str) -> DataFrame:
         .rename(name)
         .to_frame())
 
-def _extract_feature_importances(model):
+def _extract_feature_importances(model, features):
 
     importances = {}
-
-    for i, estimator in enumerate(model.estimators_):
+    k = 0
+    for estimator in model.estimators_:
         if hasattr(estimator, 'coef_'):
-            importances[i] = estimator.coef_
+            for j in range(len(estimator.coef_)):
+                importances[k] = estimator.coef_[j]
+                k += 1
         elif hasattr(estimator, 'feature_importances_'):
-            importances[i] = estimator.feature_importances_
+            importances[k] = estimator.feature_importances_
+            k += 1
+        elif hasattr(estimator, 'steps'):
+            last_estimator = estimator.steps[-1][1]
+            if hasattr(last_estimator, 'coef_'):
+                for j in range(len(last_estimator.coef_)):
+                    imp = last_estimator.coef_[j]
+                    if len(imp) == len(features):
+                        importances[k] = imp
+                        k += 1
+            elif hasattr(last_estimator, 'feature_importances_'):
+                imp = last_estimator.feature_importances_
+                if len(imp) == len(features):
+                    importances[k] = imp
+                    k += 1           
+
         else:
             continue
     
-    return DataFrame(importances)
+    return DataFrame(importances, index=features)
 
 if __name__ == '__main__':
 
@@ -58,7 +76,9 @@ if __name__ == '__main__':
             filename = basename(model_path)
             model_name = '_'.join(filename.split('_')[: -1])
             model = joblib.load(model_path)
-            importances = _extract_feature_importances(model)
+            vars_path = os.path.join(folder, 'vars')
+            features = load_yaml(os.path.join(vars_path, f'vars_{model_name}.yaml'))['features']
+            importances = _extract_feature_importances(model, features)
             if len(importances) > 0:
                 importances.to_excel(os.path.join(importances_folder, 
                                                   f'feature_importances_{model_name}.xlsx'))
