@@ -40,6 +40,7 @@ if __name__ == '__main__':
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}
+        config['features'] = list(features)
 
         logger.info(f'Grid search model, {model_name}')
         best_params, best_score, results = grid_search(config['param_grids'],

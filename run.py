@@ -39,9 +39,10 @@ if __name__ == '__main__':
 
         if arguments.model is not None and arguments.model != model_name:
             continue
-
+        
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
+        config['features'] = list(features)
         config['best_params'] = {}
 
         logger.info(f'Fitting model, {model_name}')

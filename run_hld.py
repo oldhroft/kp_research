@@ -29,7 +29,7 @@ if __name__ == '__main__':
     df_train, df_test, df_val, categories = read_data(arguments.data, val=True)
 
     logger.info(f'Data processing...')
-    data_pipeline =get_data_pipeline(config_global["default"])
+    data_pipeline = get_data_pipeline(config_global["default"])
     X_train, y_train, features = data_pipeline.fit_transform(df_train)
     X_test, y_test, features = data_pipeline.transform(df_test)
     X_val, y_val, features = data_pipeline.transform(df_val)
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     df_train_full = concat([df_train, df_val], ignore_index=True)
     X_train_full, y_train_full, features = data_pipeline.fit_transform(df_train_full)
     X_test_full, y_test_full, features = data_pipeline.transform(df_test)
-
+    
     logger.info(f'X_train shape {X_train.shape}')
     logger.info(f'X_val shape {X_val.shape}')
     logger.info(f'X_test shape {X_test.shape}')
@@ -51,6 +51,7 @@ if __name__ == '__main__':
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
         config['best_params'] = {}
+        config['features'] = list(features)
 
         logger.info(f'Grid search model, {model_name}')
         model = MODEL_DICT[model_name].set_params(**config['init_params'])

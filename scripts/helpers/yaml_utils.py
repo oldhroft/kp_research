@@ -41,7 +41,7 @@ def path_constructor(loader, node):  # pragma: no cover
         value = re.sub(path_matcher, os.environ.get(item), value, count=1)
         try:
             value = literal_eval(value)
-        except ValueError:
+        except Exception as e:
             pass
 
     return value
