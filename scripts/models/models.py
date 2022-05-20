@@ -62,6 +62,9 @@ from sklearn.dummy import DummyClassifier
 from sklearn.feature_selection import SelectFromModel
 from .column_estimator import ColumnEstimator
 
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import make_pipeline as make_pipeline_imb
+
 MODEL_DICT = {
     'xgboost': XGBClassifier(),
     'randomforest': RandomForestClassifier(),
@@ -78,7 +81,26 @@ MODEL_DICT = {
         SelectFromModel(RandomForestClassifier(random_state=17)),
         LogisticRegression()
     ),
-    'columnestimator': ColumnEstimator()
+    'columnestimator': ColumnEstimator(),
+    'smote_randomforest': make_pipeline_imb(
+        SMOTE(), RandomForestClassifier()
+    ),
+    'smote_xgboost': make_pipeline_imb(
+        SMOTE(), XGBClassifier()
+    ),
+    'smote_ridge': make_pipeline_imb(
+        SMOTE(), StandardScaler(), RidgeClassifier()
+    ),
+    'smote_lr': make_pipeline_imb(
+        SMOTE(), StandardScaler(), LogisticRegression()
+    ),
+    'smote_catboost': make_pipeline_imb(
+        SMOTE(), CatBoostClassifier()
+    ), 
+    'smote_lightgbm': make_pipeline_imb(
+        SMOTE(), LGBMClassifier(),
+    ), 
+
 }
 
         
