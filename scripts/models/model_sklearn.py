@@ -12,7 +12,7 @@ from .column_estimator import ColumnEstimator
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import make_pipeline as make_pipeline_imb
 
-from .model_factory import register_model
+from .factory import register_model
 from ._models import sk_model_factory
 from ..helpers.utils import decorate_class
 

@@ -1,7 +1,5 @@
 from ..models.model_sklearn import *
-from ..models._models import sk_model_factory
-
-from sklearn.base import BaseEstimator
+from ..models import sk_model_factory
 
 def test_sklearn_models():
 
