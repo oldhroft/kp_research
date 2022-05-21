@@ -13,6 +13,40 @@ def test_create_folder():
     os.rmdir('scripts/tests/test1')
     assert flag, "Folder scripts/tests/test1 not created"
 
+def test_class_decorator():
+
+    def function_decorator(func):
+        def new_function(cls_instance, x):
+            return func(cls_instance, x) + 1
+        new_function.__name__ = func.__name__
+        return new_function
+
+    @decorate_class(function_decorator)
+    class SampleClass:
+        def __init__(self) -> None:
+            pass
+
+        def some_function(self, x):
+            return x
+    cls_instance = SampleClass()
+
+    assert cls_instance.some_function(1) == 2
+    assert hasattr(SampleClass, "__init__")
+
+def test_class_decorator_with_static_method():
+
+    @decorate_class(staticmethod)
+    class SampleClass:
+        def __init__(self) -> None:
+            pass
+
+        def some_function(x):
+            return x
+
+    assert hasattr(SampleClass, "__init__")
+    assert SampleClass.some_function(1) == 1
+
+
 def test_add_to_environ():
     sample_conf = [
         "folder=test_folder",

@@ -1,13 +1,14 @@
 import pytest
 
 from ..models.model_factory import *
+from ..models._models import *
 
 def test_model_factory():
     factory = ModelFactory()
 
     def build_string(name):
         return f'String {name}'
-    factory.register_builder('string', build_string)
+    factory.register_builder(build_string, 'string')
 
     string_bld = factory._safe_get('string')
     assert string_bld('sample') == 'String sample'
@@ -33,11 +34,11 @@ def test_sklearn_model_factory():
     def get_xgboost():
         return XGBClassifier()
     
-    def get_rf():
+    def rf():
         return RandomForestClassifier()
 
-    factory.register_builder('xgboost', get_xgboost)
-    factory.register_builder('rf', get_rf)
+    factory.register_builder(get_xgboost, 'xgboost')
+    factory.register_builder(rf)
 
     assert 'xgboost' in factory
     assert 'rf' in factory
@@ -46,9 +47,14 @@ def test_sklearn_model_factory():
     assert isinstance(booster, XGBClassifier)
     assert booster.random_state == 17
 
+def test_register_model_error():
+    with pytest.raises(ValueError):
+        @register_model(1, 'xgboost')
+        def get_xgboost():
+            return XGBClassifier()
 
 def test_register_model():
-    @register_model('xgboost', 'sklearn')
+    @register_model(sk_model_factory, 'xgboost')
     def get_xgboost():
         return XGBClassifier()
     
@@ -57,6 +63,16 @@ def test_register_model():
     booster = sk_model_factory.get('xgboost', random_state=17)
     assert isinstance(booster, XGBClassifier)
     assert booster.random_state == 17
+
+def test_register_model_none():
+    @register_model(sk_model_factory)
+    def xgboost():
+        return XGBClassifier()
+    
+    booster = sk_model_factory.get('xgboost', random_state=17)
+    assert isinstance(booster, XGBClassifier)
+    assert booster.random_state == 17
+
     
     
 

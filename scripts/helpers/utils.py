@@ -10,6 +10,21 @@ def add_to_environ(data: List[str]) -> None:
         key, value = item.split('=')
         os.environ[key] = value
 
+def decorate_class(decorator):
+
+    def _decorate_class(cls):
+
+        method_list = [
+            func for func in dir(cls) 
+            if callable(getattr(cls, func)) and not func.startswith("__")]
+
+        for method in method_list:
+            setattr(cls, method, decorator(getattr(cls, method)))
+
+        return cls
+    
+    return _decorate_class
+
 def _choose_suffix_name(forward: bool, suffix_name: str) -> str:
     if suffix_name is not None:
         return suffix_name
