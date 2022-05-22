@@ -20,5 +20,8 @@ if __name__ == '__main__':
     badge = anybadge.Badge(
         'coverage', round(total_coverage, 3), thresholds=thresholds,
         value_format='%d%%')
-    os.remove('./cov_utils/pylint.svg')
-    badge.write_badge('./cov_utils/pylint.svg')
+
+    coverage_path = './cov_utils/coverage.svg'
+    if os.path.exists(coverage_path):
+        os.remove(coverage_path)
+    badge.write_badge(coverage_path)

@@ -1,3 +1,3 @@
-![pylint](/cov_utils/pylint.svg)
+![pylint](/cov_utils/coverage.svg)
 
 ## KP index prediction research
