@@ -130,8 +130,6 @@ def columnwise_confusion_matrix(preds_df: DataFrame, y_true_df: DataFrame,
 
     return all_matrices
 
-
-from sklearn.base import clone
 import time
 from itertools import product
 from sklearn.metrics import SCORERS
@@ -141,7 +139,7 @@ def _create_param_grid(params: dict) -> map:
     return map(lambda x: dict(zip(params.keys(), x)), 
                product(*params.values()))
 
-def validate(model, params: list,
+def validate(model: FunctionType, init_params: dict, params: list,
              X_train: array, y_train: array,
              X_val: array, y_val: array,
              scoring: str, verbose: int=1,) -> list:
@@ -155,7 +153,9 @@ def validate(model, params: list,
     for param in _create_param_grid(params):
 
         start_time = time.time()
-        model_param = clone(model).set_params(**param)
+        full_params = init_params.copy()
+        full_params.update(param)
+        model_param = model(**full_params)
         if verbose > 0: print(f'Fitting param = {param}')
         model_param.fit(X_train, y_train)
         score = scorer(model_param, X_val, y_val)
@@ -180,11 +180,11 @@ except ImportError:
     from tensorflow import random as random
     set_seed = random.set_seed
 
-def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
+def validate_keras_cv(model: FunctionType, init_params: dict,
                       cv_params: dict, params: dict, scoring: FunctionType,
                       X: array, y: array,
                       callback_params: dict, scoring_params: dict,
-                      init_params: dict, fit_params: dict,
+                      fit_params: dict,
                       verbose: bool, seed: int,) -> list:
     
     best_score = 0
@@ -204,7 +204,7 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
                 callbacks.EarlyStopping(**callback_params),
             ]
             
-            model_param = model(input_shape, n_classes, **full_params)
+            model_param = model(**full_params)
             X_train, y_train = X[train_idx], y[train_idx]
             X_test, y_test = X[test_idx], y[test_idx]
             y_train = array(get_dummies(y_train))
@@ -231,12 +231,12 @@ def validate_keras_cv(model: FunctionType, input_shape: tuple, n_classes: int,
 
     return best_param, best_score, DataFrame(results)
 
-def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
+def validate_keras(model: FunctionType, init_params: dict,
                    params: dict, scoring: FunctionType,
                    X_train: array, y_train: array,
                    X_val: array, y_val: array,
                    callback_params: dict, scoring_params: dict,
-                   init_params: dict, fit_params: dict,
+                   fit_params: dict,
                    verbose: bool, seed: int,) -> list:
     
     best_score = 0
@@ -255,7 +255,7 @@ def validate_keras(model: FunctionType, input_shape: tuple, n_classes: int,
         callbacks_list = [
             callbacks.EarlyStopping(**callback_params),
         ]
-        model_param = model(input_shape, n_classes, **full_params)
+        model_param = model(**full_params)
         y_train = array(get_dummies(y_train))
 
         model_param.fit(X_train, y_train, callbacks=callbacks_list,

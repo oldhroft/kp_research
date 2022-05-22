@@ -13,12 +13,15 @@ def test_model_factory():
     string_bld = factory._safe_get('string')
     assert string_bld('sample') == 'String sample'
 
+    string_bld = factory.get_builder('string')(name='sample')
+    assert string_bld == 'String sample'
+
     string1 = factory.get('string', name='1')
     assert string1 == 'String 1'
 
     with pytest.raises(ValueError):
         factory.get('nothing')
-    
+
     try:
         factory.get('nothing')
     except ValueError as e:
@@ -44,6 +47,10 @@ def test_sklearn_model_factory():
     assert 'rf' in factory
 
     booster = factory.get('xgboost', random_state=17)
+    assert isinstance(booster, XGBClassifier)
+    assert booster.random_state == 17
+
+    booster = factory.get_builder('xgboost')(random_state=17)
     assert isinstance(booster, XGBClassifier)
     assert booster.random_state == 17
 

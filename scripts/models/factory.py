@@ -19,6 +19,9 @@ class ModelFactory(object):
     
     def get(self, key, **kwargs):
         return self._safe_get(key)(**kwargs)
+    
+    def get_builder(self, key):
+        return lambda **kwargs: self.get(key, **kwargs)
 
 
 class SklearnModelFactory(ModelFactory):

@@ -5,7 +5,7 @@ from sklearn.metrics import f1_score
 from scripts.helpers.utils import add_to_environ, validate_keras_cv
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
-from scripts.models.models import NN_MODEL_DICT
+from scripts.models import nn_model_factory
 
 from run_utils import fit_keras, get_data_pipeline, save_history, score_keras, read_data
 from run_utils import create_folder_structure, get_data_pipeline
@@ -48,13 +48,16 @@ if __name__ == '__main__':
         shape = X_train.shape[1: ]
 
         logger.info(f'Grid search model, {model_name}')
-        best_params, best_score, results = validate_keras_cv(NN_MODEL_DICT[model_name], shape,  
-                                                             len(categories), config['cv_params'],
+        model_fn = nn_model_factory.get_builder(model_name)
+        init_params = config['init_params'].copy()
+        init_params['input_shape'] = shape
+        init_params['n_classes'] = len(categories)
+        best_params, best_score, results = validate_keras_cv(model_fn, init_params,
+                                                             config['cv_params'],
                                                              config['param_grids'],
                                                              f1_score, X_train, y_train[:, 0],
                                                              config['callback_params'],
-                                                             config['scoring_params'], 
-                                                             config['init_params'],
+                                                             config['scoring_params'],
                                                              config['fit_params'],
                                                              **config['gcv_params'])
         save_cv_results(results, model_name, structure, PROC_NAME)
@@ -63,10 +66,9 @@ if __name__ == '__main__':
         logger.info(f'Best score: {best_score}')
 
         logger.info(f'Fitting model, {model_name}')
-        final_params = config['init_params'].copy()
+        final_params = init_params.copy()
         final_params.update(best_params)
-        model, history = fit_keras(model_name, shape, len(categories), 
-                                   final_params, config['fit_params'],
+        model, history = fit_keras(model_name, final_params, config['fit_params'],
                                    config['callback_params'],
                                    X_train, y_train, config['seed'])
 

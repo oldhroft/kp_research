@@ -1,13 +1,11 @@
 import logging
 import os
 
+from run_utils import (create_folder_structure, fit, get_data_pipeline,
+                       read_data, save_model, save_vars, score)
 from scripts.helpers.logging_utils import config_logger, create_argparser
-from scripts.models.models import MODEL_DICT
 from scripts.helpers.utils import add_to_environ
-
-from run_utils import get_data_pipeline, save_model,  score, read_data, fit
-from run_utils import create_folder_structure, save_vars
-from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
+from scripts.helpers.yaml_utils import dict_to_yaml_str, load_yaml
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
