@@ -13,7 +13,7 @@ from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import make_pipeline as make_pipeline_imb
 
 from .factory import register_model
-from ._models import sk_model_factory
+from ._models import sk_model_factory, nn_model_factory
 from ..helpers.utils import decorate_class
 
 @decorate_class(staticmethod)
@@ -84,3 +84,52 @@ class SkLearnModels():
         return make_pipeline_imb(
             SMOTE(), LGBMClassifier(),
         )
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers as L
+
+@decorate_class(staticmethod)
+@decorate_class(register_model(nn_model_factory))
+class KerasModels:
+    def perceptron(input_shape: tuple, n_classes: int=3, units_array: list=[10], 
+                    optimizer: str='adam') -> Sequential:
+
+        model = Sequential([
+            L.Input(shape=input_shape),
+            *(L.Dense(units=units, activation='relu') for units in units_array),
+            L.Dense(units=n_classes, activation='softmax')  
+        ])
+
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+
+        return model
+
+    def lstm(input_shape, n_classes, units_array, optimizer, ):
+        
+        model = Sequential([
+            L.Input(shape=input_shape),
+            *(L.LSTM(i, return_sequences=True, ) 
+            for i in units_array['rnn'][:-1]),
+            L.LSTM(units_array['rnn'][-1]),
+            *(L.Dense(units=units, activation='relu') 
+            for units in units_array['dense']),
+            L.Dense(n_classes, activation='softmax')
+        ], )
+        
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+        return model
+
+    def gru(input_shape, n_classes, units_array, optimizer, ):
+        
+        model = Sequential([
+            L.Input(shape=input_shape),
+            *(L.GRU(i, return_sequences=True, ) 
+            for i in units_array['rnn'][:-1]),
+            L.GRU(units_array['rnn'][-1]),
+            *(L.Dense(units=units, activation='relu') 
+            for units in units_array['dense']),
+            L.Dense(n_classes, activation='softmax')
+        ], )
+        
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+        return model

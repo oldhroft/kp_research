@@ -25,6 +25,9 @@ class SklearnModelFactory(ModelFactory):
     def get(self, key, **kwargs):
         return self._safe_get(key)().set_params(**kwargs)
 
+class KerasModelFactory(ModelFactory):
+    pass
+
 
 def register_model(factory, name=None):
     def _register_model(builder):
@@ -35,9 +38,4 @@ def register_model(factory, name=None):
         factory.register_builder(builder, name)
         return builder
     return _register_model
-
-
-
-
-
-
+    
