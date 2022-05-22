@@ -1,0 +1,4 @@
+#!/bin/bash
+
+coverage run -m pytest scripts
+python cov_utils/get_coverage.py
