@@ -1,27 +1,26 @@
 import os
+from datetime import datetime
 import joblib
 import yaml
-from datetime import datetime
 
-from pandas import DataFrame, read_csv
-from pandas import get_dummies
 from numpy import array, squeeze
-
-
-from sklearn.multioutput import MultiOutputClassifier
+from pandas import DataFrame, get_dummies, read_csv
 from sklearn.metrics import f1_score
-from sklearn.model_selection import StratifiedKFold, GridSearchCV
-
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.multioutput import MultiOutputClassifier
 from tensorflow.keras import callbacks as callbacks
+
 try:
     from tensorflow.random import set_seed
 except ImportError:
     from tensorflow import random as random
     set_seed = random.set_seed
 
+from scripts.helpers.utils import (columnwise_confusion_matrix,
+                                   columnwise_score, create_folder)
+from scripts.models import nn_model_factory, sk_model_factory
 from scripts.pipeline.preprocess import preprocess_3h
-from scripts.helpers.utils import columnwise_score, columnwise_confusion_matrix, create_folder
-from scripts.models.models import *
+
 
 def read_data(path, val=False):
     if path is None:
@@ -44,6 +43,7 @@ def read_data(path, val=False):
         return df_train.reset_index(), df_test.reset_index(), categories
 
 from importlib import import_module
+
 
 def get_data_pipeline(config):
     cls = getattr(import_module('scripts.pipeline.data_pipe'), 
@@ -81,7 +81,9 @@ def _convert_to_results(gcv: GridSearchCV) -> DataFrame:
 
 def grid_search(params, model_name, init_params, X_train, y_train, 
                 cv_params, gcv_params):
-    model = MODEL_DICT[model_name].set_params(**init_params)
+
+    model = sk_model_factory.get(model_name, **init_params)
+                
     skf = StratifiedKFold(**cv_params)
     gcv = GridSearchCV(model, params, cv=skf, **gcv_params)
     gcv.fit(X_train, y_train)
@@ -90,13 +92,15 @@ def grid_search(params, model_name, init_params, X_train, y_train,
 
     return gcv.best_params_, gcv.best_score_, results
 
-def fit(model_name, params, X_train, y_train):
-    model = MultiOutputClassifier(MODEL_DICT[model_name].set_params(**params))
+def fit(model_name, init_params, X_train, y_train):
+
+    model = sk_model_factory.get(model_name, **init_params)
+    model = MultiOutputClassifier(model)
     model.fit(X_train, y_train)
     return model
 
-def fit_keras(model_name, input_shape, n_classes, init_params, 
-              fit_params, callback_params, X_train, y_train, seed):
+def fit_keras(model_name, init_params, fit_params, callback_params, 
+              X_train, y_train, seed):
     
     models = []
     histories = {}
@@ -104,7 +108,7 @@ def fit_keras(model_name, input_shape, n_classes, init_params,
     for col in range(y_train.shape[1]):
         set_seed(seed)
         y_dummy = array(get_dummies(y_train[:, col]))
-        model = NN_MODEL_DICT[model_name](input_shape, n_classes, **init_params)
+        model = nn_model_factory.get(model_name, **init_params)
         callbacks_list = [
             callbacks.EarlyStopping(**callback_params),
         ]

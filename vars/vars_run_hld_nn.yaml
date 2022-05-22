@@ -4,8 +4,8 @@ default: &default
     random_state: null
     shuffle: false
   gv_params:
-    scoring: f1_macro
     verbose: 2
+    seed: 17
   scoring_params:
     average: macro
   seed: 16

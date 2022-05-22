@@ -1,15 +1,15 @@
-import os
 import logging
+import os
 
 from pandas import concat
 
-from scripts.helpers.utils import validate, add_to_environ
+from run_utils import (create_folder_structure, fit, get_data_pipeline,
+                       read_data, save_cv_results, save_model, save_vars,
+                       score)
 from scripts.helpers.logging_utils import config_logger, create_argparser
-from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
-from scripts.models.models import MODEL_DICT
-
-from run_utils import fit, get_data_pipeline, score, read_data, save_model
-from run_utils import create_folder_structure, save_vars, save_cv_results
+from scripts.helpers.utils import add_to_environ, validate
+from scripts.helpers.yaml_utils import dict_to_yaml_str, load_yaml
+from scripts.models import sk_model_factory
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
@@ -44,7 +44,6 @@ if __name__ == '__main__':
     logger.info(f'X_train_full shape {X_train_full.shape}')
 
     for model_name, config in config_global['models'].items():
-
         if arguments.model is not None and arguments.model != model_name:
             continue
 
@@ -54,8 +53,9 @@ if __name__ == '__main__':
         config['features'] = list(features)
 
         logger.info(f'Grid search model, {model_name}')
-        model = MODEL_DICT[model_name].set_params(**config['init_params'])
-        best_score, best_params, results = validate(model, config['param_grids'],
+        model_fn = sk_model_factory.get_builder(model_name)
+        best_score, best_params, results = validate(model_fn, config['init_params'],
+                                                    config['param_grids'],
                                                     X_train, y_train[:, 0],
                                                     X_val, y_val[:, 0], **config['gv_params'])
         save_cv_results(results, model_name, structure, PROC_NAME)

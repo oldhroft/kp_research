@@ -48,3 +48,12 @@ models:
     <<: *default
     init_params:
       column_idx: 0
+
+  smote_randomforest:
+    <<: *default
+    init_params:
+      smote__random_state: 17
+      smote__n_jobs: -1
+      randomforestclassifier__random_state: 17
+      randomforestclassifier__n_jobs: -1
+

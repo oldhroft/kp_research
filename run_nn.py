@@ -3,7 +3,6 @@ import logging
 
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
-from scripts.models.models import NN_MODEL_DICT
 from scripts.helpers.utils import add_to_environ
 
 from run_utils import fit_keras, get_data_pipeline, save_history, read_data, score_keras
@@ -45,9 +44,11 @@ if __name__ == '__main__':
 
         shape = X_train.shape[1: ]
         logger.info(f'Fitting model, {model_name}')
-        model, history = fit_keras(model_name, shape, len(categories), 
-                                   config['init_params'], 
-                                   config['fit_params'],
+
+        init_params = config['init_params'].copy()
+        init_params['input_shape'] = shape
+        init_params['n_classes'] = len(categories)
+        model, history = fit_keras(model_name, init_params, config['fit_params'],
                                    config['callback_params'],
                                    X_train, y_train, config['seed'])
 

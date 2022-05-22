@@ -1,13 +1,12 @@
-import os
 import logging
+import os
 
+from run_utils import (create_folder_structure, fit, get_data_pipeline,
+                       grid_search, read_data, save_cv_results, save_model,
+                       save_vars, score)
 from scripts.helpers.logging_utils import config_logger, create_argparser
-from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 from scripts.helpers.utils import add_to_environ
-from scripts.models.models import MODEL_DICT
-
-from run_utils import fit, get_data_pipeline, score, read_data, save_model
-from run_utils import create_folder_structure, grid_search, save_vars, save_cv_results
+from scripts.helpers.yaml_utils import dict_to_yaml_str, load_yaml
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
@@ -44,8 +43,7 @@ if __name__ == '__main__':
 
         logger.info(f'Grid search model, {model_name}')
         best_params, best_score, results = grid_search(config['param_grids'],
-                                                       model_name,
-                                                       config['init_params'],
+                                                       model_name, config['init_params'],
                                                        X_train, y_train[:, 0], 
                                                        config['cv_params'], 
                                                        config['gcv_params'])
@@ -55,7 +53,6 @@ if __name__ == '__main__':
         params.update(best_params)
         logger.info(f'Best params: {best_params}')
         logger.info(f'Best score: {best_score}')
-
 
         logger.info(f'Fitting model, {model_name}')
         model = fit(model_name, params, X_train, y_train)
