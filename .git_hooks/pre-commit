@@ -1,4 +1,9 @@
 #!/bin/bash
+source ~/.bash_profile
+conda activate tf
 
 coverage run -m pytest scripts
 python cov_utils/get_coverage.py
+
+git add .coverage
+git add cov_utils/coverage.svg
