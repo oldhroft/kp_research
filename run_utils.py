@@ -171,4 +171,16 @@ def save_vars(config: dict, proc_name: str, model_name: str, structure: dict) ->
     config['dttm'] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
     with open(os.path.join(structure["vars_path"], f'vars_{proc_name}_{model_name}.yaml'),
             'w', encoding='utf-8') as file:
-        yaml.dump(config, file)    
+        yaml.dump(config, file)
+
+from scripts.models.factory import ModelFactory
+def check_config(config: dict, factory: ModelFactory):
+    length = 0
+    not_in_factory = []
+    for item in config['models']:
+        if item not in factory:
+            not_in_factory.append(item)
+            length += 1
+    
+    if length > 0:
+        raise ValueError(f'Models {",".join(not_in_factory)} are not implemented')

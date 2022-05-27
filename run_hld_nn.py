@@ -11,6 +11,7 @@ from scripts.models import nn_model_factory
 
 from run_utils import fit_keras, get_data_pipeline, save_history, save_model_keras, score_keras, read_data
 from run_utils import create_folder_structure, save_model_keras, save_vars, save_cv_results
+from run_utils import check_config
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     vars_name = f'vars_{PROC_NAME}.yaml'
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     config_global = load_yaml(vars_path)
+    check_config(config_global, nn_model_factory)
 
     df_train, df_test, df_val, categories = read_data(arguments.data, val=True)
 
