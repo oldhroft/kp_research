@@ -74,6 +74,26 @@ def test_keras_model_factory():
     assert isinstance(booster, XGBClassifier)
     assert booster.random_state == 17
 
+def test_cv_factory():
+
+    factory = CVFactory()
+
+    def get_xgboost(**kwargs):
+        return XGBClassifier(**kwargs)
+    
+    def rf(**kwargs):
+        return RandomForestClassifier(**kwargs)
+
+    factory.register_builder(get_xgboost, 'xgboost')
+    factory.register_builder(rf)
+
+    assert 'xgboost' in factory
+    assert 'rf' in factory
+
+    booster = factory.get('xgboost', random_state=17)
+    assert isinstance(booster, XGBClassifier)
+    assert booster.random_state == 17
+
 def test_register_model_error():
     with pytest.raises(ValueError):
         @register_model(1, 'xgboost')

@@ -80,12 +80,10 @@ def _convert_to_results(gcv: GridSearchCV) -> DataFrame:
     return DataFrame(results)
 
 def grid_search(params, model_name, init_params, X_train, y_train, 
-                cv_params, gcv_params):
+                cv, gcv_params):
 
     model = sk_model_factory.get(model_name, **init_params)
-                
-    skf = StratifiedKFold(**cv_params)
-    gcv = GridSearchCV(model, params, cv=skf, **gcv_params)
+    gcv = GridSearchCV(model, params, cv=cv, **gcv_params)
     gcv.fit(X_train, y_train)
 
     results = _convert_to_results(gcv)

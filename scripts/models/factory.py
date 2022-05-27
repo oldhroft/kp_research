@@ -31,6 +31,8 @@ class SklearnModelFactory(ModelFactory):
 class KerasModelFactory(ModelFactory):
     pass
 
+class CVFactory(ModelFactory):
+    pass
 
 def register_model(factory, name=None):
     def _register_model(builder):

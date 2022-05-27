@@ -13,7 +13,7 @@ from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import make_pipeline as make_pipeline_imb
 
 from .factory import register_model
-from ._models import sk_model_factory, nn_model_factory
+from ._models import sk_model_factory, nn_model_factory, cv_factory
 from ..helpers.utils import decorate_class
 
 @decorate_class(staticmethod)
@@ -133,3 +133,15 @@ class KerasModels:
         
         model.compile(loss='categorical_crossentropy', optimizer=optimizer)
         return model
+
+from sklearn.model_selection import StratifiedKFold, TimeSeriesSplit
+
+@decorate_class(staticmethod)
+@decorate_class(register_model(cv_factory))
+class CV:
+
+    def skf(**kwargs):
+        return StratifiedKFold(**kwargs)
+    
+    def tss(**kwargs):
+        return TimeSeriesSplit(**kwargs)
