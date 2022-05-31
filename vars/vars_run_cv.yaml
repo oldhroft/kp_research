@@ -2,6 +2,7 @@ default: &default
   cv: tss
   cv_params:
     n_splits: 5
+  gcv: gcv
   gcv_params:
     scoring: f1_macro
     verbose: 2

@@ -48,7 +48,7 @@ if __name__ == '__main__':
         best_params, best_score, results = grid_search(config['param_grids'],
                                                        model_name, config['init_params'],
                                                        X_train, y_train[:, 0], 
-                                                       cv, config['gcv_params'])
+                                                       cv, config['gcv'], config['gcv_params'])
         save_cv_results(results, model_name, structure, PROC_NAME)
         config['best_params'] = best_params
         params = config['init_params'].copy()
