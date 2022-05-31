@@ -172,7 +172,7 @@ def validate(model: FunctionType, init_params: dict, params: list,
 from pandas import Series, DataFrame
 from pandas import get_dummies
 from numpy import mean
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import BaseCrossValidator
 from tensorflow.keras import callbacks as callbacks
 try:
     from tensorflow.random import set_seed
@@ -181,7 +181,7 @@ except ImportError:
     set_seed = random.set_seed
 
 def validate_keras_cv(model: FunctionType, init_params: dict,
-                      cv_params: dict, params: dict, scoring: FunctionType,
+                      cv: BaseCrossValidator, params: dict, scoring: FunctionType,
                       X: array, y: array,
                       callback_params: dict, scoring_params: dict,
                       fit_params: dict,
@@ -197,7 +197,7 @@ def validate_keras_cv(model: FunctionType, init_params: dict,
         full_params = init_params.copy()
         full_params.update(param)
         sub_scores = []
-        cv = StratifiedKFold(**cv_params)
+
         i = 0
         for train_idx, test_idx in cv.split(X, y):
             callbacks_list = [

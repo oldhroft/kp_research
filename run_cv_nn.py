@@ -5,7 +5,7 @@ from sklearn.metrics import f1_score
 from scripts.helpers.utils import add_to_environ, validate_keras_cv
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
-from scripts.models import nn_model_factory
+from scripts.models import nn_model_factory, cv_factory
 
 from run_utils import fit_keras, get_data_pipeline, save_history, score_keras, read_data
 from run_utils import create_folder_structure, get_data_pipeline
@@ -53,9 +53,9 @@ if __name__ == '__main__':
         init_params = config['init_params'].copy()
         init_params['input_shape'] = shape
         init_params['n_classes'] = len(categories)
+        cv = cv_factory.get(config['cv'], **config['cv_params'])
         best_params, best_score, results = validate_keras_cv(model_fn, init_params,
-                                                             config['cv_params'],
-                                                             config['param_grids'],
+                                                             cv, config['param_grids'],
                                                              f1_score, X_train, y_train[:, 0],
                                                              config['callback_params'],
                                                              config['scoring_params'],
