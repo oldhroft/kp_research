@@ -1,4 +1,3 @@
-from random import sample
 import pytest
 
 from ..helpers.utils import *
@@ -131,8 +130,8 @@ class TestAddLags:
         assert df_new.shape == DF.shape
 
 
-from sklearn.metrics import f1_score
 from numpy import array, sqrt
+from sklearn.metrics import f1_score
 
 def test_columnwise_score():
 
@@ -165,7 +164,7 @@ def test_columnwise_score():
     diff = sqrt(((true_scores - score) ** 2).sum())
     assert diff < 1e-5
 
-from ..helpers.utils import _create_param_grid
+from ..helpers.utils import _create_param_grid, _random_param_grid
 
 def test__create_param_grid():
     initial_grid = {
@@ -192,3 +191,29 @@ def test__create_param_grid():
     final_grid_res = _serialize(final_grid_res)
 
     assert final_grid == final_grid_res
+
+def test__random_param_grid():
+    initial_grid = {
+        'first': [1, 2, 4, 5, 6, 7, 8, 9, 10],
+        "second": [2, 3, 28, 2, 2, 3, 49, 3],
+        'third': [6, 5, 4, 3]
+    }
+
+    random_grid = _random_param_grid(initial_grid, seed=18, n_iter=12)
+
+    assert len(random_grid) == 12
+    assert 'third' in random_grid[0]
+
+def test__random_param_grid_seed():
+
+    initial_grid = {
+        'first': [1, 2, 4, 5, 6, 7, 8, 9, 10],
+        "second": [2, 3, 28, 2, 2, 3, 49, 3],
+        'third': [6, 5, 4, 3]
+    }
+
+    random_grid1 = _random_param_grid(initial_grid, seed=18, n_iter=12)
+    random_grid2 = _random_param_grid(initial_grid, seed=18, n_iter=12)
+
+    assert str(random_grid1) == str(random_grid2)
+

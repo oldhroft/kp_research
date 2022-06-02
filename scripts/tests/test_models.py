@@ -1,5 +1,5 @@
 from ..models.models import *
-from ..models import sk_model_factory, nn_model_factory
+from ..models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
 
 from ..helpers.yaml_utils import load_yaml
 
@@ -47,3 +47,44 @@ def test_model_buold_lstm_from_factory():
 def test_model_buold_perceptron_from_factory():
     model = nn_model_factory.get("perceptron", **CONF['perceptron']['init_params'])
     assert len(model.layers) == 3, "Perceptron shape not correct"
+
+def test_cv():
+
+    method_list = [
+        func for func in dir(CV) 
+        if callable(getattr(CV, func)) and not func.startswith("__")]
+    
+    for method in method_list:
+        assert method in cv_factory
+
+from sklearn.model_selection import BaseCrossValidator
+
+def test_cv_build():
+    method_list = [
+        func for func in dir(CV) 
+        if callable(getattr(CV, func)) and not func.startswith("__")]
+
+    for method in method_list:
+        assert isinstance(getattr(CV, method)(n_splits=3), BaseCrossValidator)
+
+def test_gcv():
+
+    method_list = [
+        func for func in dir(GCV) 
+        if callable(getattr(GCV, func)) and not func.startswith("__")]
+    
+    for method in method_list:
+        assert method in gcv_factory
+
+from sklearn.ensemble import RandomForestClassifier
+
+def test_gcv_build():
+    model = RandomForestClassifier()
+    grid = {'max_depth': [2, 4, 5, 6, 7]}
+    method_list = [
+        func for func in dir(GCV) 
+        if callable(getattr(GCV, func)) and not func.startswith("__")]
+
+    for method in method_list:
+        assert hasattr(getattr(GCV, method)(estimator=model, param_grid=grid), 'fit')
+        assert hasattr(getattr(GCV, method)(estimator=model, param_grid=grid), 'predict')

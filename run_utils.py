@@ -6,7 +6,7 @@ import yaml
 from numpy import array, squeeze
 from pandas import DataFrame, get_dummies, read_csv
 from sklearn.metrics import f1_score
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.model_selection import GridSearchCV
 from sklearn.multioutput import MultiOutputClassifier
 from tensorflow.keras import callbacks as callbacks
 
@@ -18,7 +18,7 @@ except ImportError:
 
 from scripts.helpers.utils import (columnwise_confusion_matrix,
                                    columnwise_score, create_folder)
-from scripts.models import nn_model_factory, sk_model_factory
+from scripts.models import nn_model_factory, sk_model_factory, gcv_factory
 from scripts.pipeline.preprocess import preprocess_3h
 
 
@@ -80,12 +80,11 @@ def _convert_to_results(gcv: GridSearchCV) -> DataFrame:
     return DataFrame(results)
 
 def grid_search(params, model_name, init_params, X_train, y_train, 
-                cv_params, gcv_params):
+                cv, gcv_name, gcv_params):
 
     model = sk_model_factory.get(model_name, **init_params)
-                
-    skf = StratifiedKFold(**cv_params)
-    gcv = GridSearchCV(model, params, cv=skf, **gcv_params)
+    gcv = gcv_factory.get('gcv', estimator=model, param_grid=params, 
+                          cv=cv, **gcv_params)
     gcv.fit(X_train, y_train)
 
     results = _convert_to_results(gcv)
