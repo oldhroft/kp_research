@@ -1,5 +1,6 @@
-from random import sample
 import pytest
+
+from scripts.helpers.yaml_utils import load_yaml
 
 from ..helpers.utils import *
 from ..helpers.utils import _choose_suffix_name
@@ -231,3 +232,40 @@ def test__create_param_grid():
     final_grid_res = _serialize(final_grid_res)
 
     assert final_grid == final_grid_res
+
+
+from sklearn.linear_model import RidgeClassifier
+from ..pipeline.preprocess import preprocess_3h
+from ..pipeline.data_pipe import LagDataPipe
+from sklearn.metrics import f1_score
+
+def test_validate():
+
+    def _ridge(**kwargs):
+        return RidgeClassifier(**kwargs)
+    
+    df = DF.pipe(preprocess_3h)
+    
+    config = load_yaml('scripts/tests/test_yamls/test_vars.yaml')
+    data_pipeline = LagDataPipe(**config)
+    X_train, y_train, _ = data_pipeline.fit_transform(df)
+    X_val, y_val = X_train[-10:], y_train[-10:]
+    init_params = {
+        'alpha': 1
+    }
+
+    gv_params = {
+        "scoring": "f1_macro",
+        "verbose": 2
+    }
+
+    param_grids = {
+        "alpha": [1, .2, 3, 4]
+    }
+
+    best_score, _, _ = validate(_ridge, init_params,
+                                param_grids,
+                                X_train, y_train[:, 0],
+                                X_val, y_val[:, 0], **gv_params)
+    
+    assert isinstance(best_score, float)
