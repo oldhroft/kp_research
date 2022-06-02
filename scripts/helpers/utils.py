@@ -180,16 +180,30 @@ except ImportError:
     from tensorflow import random as random
     set_seed = random.set_seed
 
+import random
+
+def _random_param_grid(params: dict, n_iter: int, seed: int):
+    grid = list(_create_param_grid(params))
+    random.seed(seed)
+    random.shuffle(grid)
+    return grid[: n_iter]
+
 def validate_keras_cv(model: FunctionType, init_params: dict,
                       cv: BaseCrossValidator, params: dict, scoring: FunctionType,
                       X: array, y: array,
                       callback_params: dict, scoring_params: dict,
                       fit_params: dict,
-                      verbose: bool, seed: int,) -> list:
-    
+                      verbose: bool, seed: int,
+                      n_iter: int=None) -> list:
     best_score = 0
     best_param = None
     results = []
+
+    if n_iter is not None:
+        grid = list(_create_param_grid(params))
+    else:
+        grid = _random_param_grid(params, n_iter=n_iter, seed=seed)
+
     for param in _create_param_grid(params):
         start_time = time.time()
         if seed is not None: set_seed(seed)
