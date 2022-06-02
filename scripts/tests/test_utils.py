@@ -236,7 +236,7 @@ def test__create_param_grid():
 
 from sklearn.linear_model import RidgeClassifier
 from ..pipeline.preprocess import preprocess_3h
-from ..pipeline.data_pipe import LagDataPipe
+from ..pipeline.data_pipe import LagDataPipe, SequenceDataPipe
 from sklearn.metrics import f1_score
 
 def test_validate():
@@ -267,5 +267,77 @@ def test_validate():
                                 param_grids,
                                 X_train, y_train[:, 0],
                                 X_val, y_val[:, 0], **gv_params)
+    
+    assert isinstance(best_score, float)
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers as L
+
+def test_validate_keras():
+
+    def perceptron(input_shape: tuple, n_classes: int=3, units_array: list=[10], 
+                    optimizer: str='adam') -> Sequential:
+
+        model = Sequential([
+            L.Input(shape=input_shape),
+            *(L.Dense(units=units, activation='relu') for units in units_array),
+            L.Dense(units=n_classes, activation='softmax')  
+        ])
+
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+
+        return model
+    
+    df = DF.pipe(preprocess_3h)
+    print(df.shape)
+    config = load_yaml('scripts/tests/test_yamls/test_vars.yaml')
+    config['backward_steps'] = 1
+    data_pipeline = LagDataPipe(**config)
+    X_train, y_train, _ = data_pipeline.fit_transform(df)
+    print(X_train.shape)
+    X_val, y_val = X_train[-10:], y_train[-10:]
+    init_params = {
+        "optimizer": "adam",
+        "input_shape": X_train.shape[1: ],
+        "n_classes": 2,
+    }
+
+    gv_params = {
+        "scoring": "f1_macro",
+        "verbose": 2
+    }
+
+    param_grids = {
+        "units_array": [[1]],
+    }
+
+    callback_params = {
+        "monitor": "val_loss",
+        "patience": 10,
+        "restore_best_weights": True,
+    }
+
+    scoring_params = {
+        "average": "macro",
+    }
+
+    fit_params = {
+        "epochs": 2,
+        "validation_split": 0.1,
+        "verbose": 2,
+    }
+    gv_params = {
+        "verbose": 2,
+        "seed": 17,
+    }
+
+    _, best_score, _ = validate_keras(perceptron, init_params,
+                                      param_grids,
+                                      f1_score, X_train, y_train[:, 0],
+                                      X_val, y_val[:, 0],
+                                      callback_params,
+                                      scoring_params,
+                                      fit_params,
+                                      **gv_params)
     
     assert isinstance(best_score, float)
