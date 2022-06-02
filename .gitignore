@@ -1,6 +1,6 @@
 *.xlsx
 *.txt
-*.csv
+data/*.csv
 *.xlsm
 __pycache__
 *.log

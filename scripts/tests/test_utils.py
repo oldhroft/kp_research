@@ -165,6 +165,45 @@ def test_columnwise_score():
     diff = sqrt(((true_scores - score) ** 2).sum())
     assert diff < 1e-5
 
+def test_columnwise_confusion_matrix():
+
+    '''
+    first_column:
+        0: Precision: 0.5, Recall: 1., F1: 2 / 3
+        1: Precision: 1, Recall: 0,5, F1: 2 / 3
+        macro: 2 / 3s
+    second_column:
+        0: F1: 1
+        1: F1: 1
+        macro: 1
+    '''
+
+    y_true = [
+        [1, 0],
+        [1, 1],
+        [0, 1]
+    ]
+
+    y_pred = [
+        [0, 0],
+        [1, 1],
+        [0, 1]
+    ]
+
+    categories = [0, 1,]
+    matrices = columnwise_confusion_matrix(y_pred, y_true, categories)
+
+    assert len(matrices) == 2
+
+    matrix_0 = array([
+        [1, 0],
+        [1, 1],
+    ])
+
+    diff = sqrt(((matrix_0 - matrices[0].values) ** 2).sum())
+
+    assert diff < 1e-5
+
 from ..helpers.utils import _create_param_grid
 
 def test__create_param_grid():
