@@ -7,4 +7,4 @@ python cov_utils/get_coverage.py
 
 git add .coverage
 git add cov_utils/coverage.svg
-git add REAMDE.md
+git add README.md
