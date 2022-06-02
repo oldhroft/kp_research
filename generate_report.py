@@ -4,7 +4,8 @@ import joblib
 
 from argparse import ArgumentParser
 
-from pandas import concat, read_csv, DataFrame, Series
+from pandas import concat, read_csv, DataFrame
+from tqdm import tqdm
 
 from scripts.helpers.utils import create_folder
 from scripts.helpers.yaml_utils import load_yaml
@@ -72,7 +73,7 @@ if __name__ == '__main__':
         importances_folder = os.path.join(report_path, 'feature_importances')
         create_folder(importances_folder)
         models_wildcard = os.path.join(os.path.join(folder, 'model'), '*.pkl')
-        for model_path in glob.glob(models_wildcard):
+        for model_path in tqdm(glob.glob(models_wildcard)):
             filename = basename(model_path)
             model_name = '_'.join(filename.split('_')[: -1])
             model = joblib.load(model_path)

@@ -5,7 +5,7 @@ from pandas import concat
 
 from run_utils import (create_folder_structure, fit, get_data_pipeline,
                        read_data, save_cv_results, save_model, save_vars,
-                       score)
+                       score, check_config)
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.utils import add_to_environ, validate
 from scripts.helpers.yaml_utils import dict_to_yaml_str, load_yaml
@@ -25,6 +25,7 @@ if __name__ == '__main__':
     vars_name = f'vars_{PROC_NAME}.yaml'
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     config_global = load_yaml(vars_path)
+    check_config(config_global, sk_model_factory)
 
     df_train, df_test, df_val, categories = read_data(arguments.data, val=True)
 

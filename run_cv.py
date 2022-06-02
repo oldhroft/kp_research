@@ -3,10 +3,11 @@ import os
 
 from run_utils import (create_folder_structure, fit, get_data_pipeline,
                        grid_search, read_data, save_cv_results, save_model,
-                       save_vars, score)
+                       save_vars, score, check_config)
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.utils import add_to_environ
 from scripts.helpers.yaml_utils import dict_to_yaml_str, load_yaml
+from scripts.models import sk_model_factory, cv_factory
 
 PROC_NAME = os.path.basename(__file__).split('.')[0]
 
@@ -22,6 +23,7 @@ if __name__ == '__main__':
     vars_name = f'vars_{PROC_NAME}.yaml'
     vars_path = os.path.join('vars', vars_name) if arguments.vars is None else arguments.vars
     config_global = load_yaml(vars_path)
+    check_config(config_global, sk_model_factory)
 
     df_train, df_test, categories = read_data(arguments.data)
     logger.info(f'Data processing...')
@@ -42,11 +44,11 @@ if __name__ == '__main__':
         config['features'] = list(features)
 
         logger.info(f'Grid search model, {model_name}')
+        cv = cv_factory.get(config['cv'], **config['cv_params'])
         best_params, best_score, results = grid_search(config['param_grids'],
                                                        model_name, config['init_params'],
                                                        X_train, y_train[:, 0], 
-                                                       config['cv_params'], 
-                                                       config['gcv_params'])
+                                                       cv, config['gcv'], config['gcv_params'])
         save_cv_results(results, model_name, structure, PROC_NAME)
         config['best_params'] = best_params
         params = config['init_params'].copy()

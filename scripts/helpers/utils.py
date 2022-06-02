@@ -172,7 +172,7 @@ def validate(model: FunctionType, init_params: dict, params: list,
 from pandas import Series, DataFrame
 from pandas import get_dummies
 from numpy import mean
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import BaseCrossValidator
 from tensorflow.keras import callbacks as callbacks
 try:
     from tensorflow.random import set_seed
@@ -180,24 +180,38 @@ except ImportError:
     from tensorflow import random as random
     set_seed = random.set_seed
 
+import random
+
+def _random_param_grid(params: dict, n_iter: int, seed: int):
+    grid = list(_create_param_grid(params))
+    random.seed(seed)
+    random.shuffle(grid)
+    return grid[: n_iter]
+
 def validate_keras_cv(model: FunctionType, init_params: dict,
-                      cv_params: dict, params: dict, scoring: FunctionType,
+                      cv: BaseCrossValidator, params: dict, scoring: FunctionType,
                       X: array, y: array,
                       callback_params: dict, scoring_params: dict,
                       fit_params: dict,
-                      verbose: bool, seed: int,) -> list:
-    
+                      verbose: bool, seed: int,
+                      n_iter: int=None) -> list:
     best_score = 0
     best_param = None
     results = []
-    for param in _create_param_grid(params):
+
+    if n_iter is None:
+        grid = list(_create_param_grid(params))
+    else:
+        grid = _random_param_grid(params, n_iter=n_iter, seed=seed)
+
+    for param in grid:
         start_time = time.time()
         if seed is not None: set_seed(seed)
         if verbose: print('Fitting param {}'.format(param))
         full_params = init_params.copy()
         full_params.update(param)
         sub_scores = []
-        cv = StratifiedKFold(**cv_params)
+
         i = 0
         for train_idx, test_idx in cv.split(X, y):
             callbacks_list = [

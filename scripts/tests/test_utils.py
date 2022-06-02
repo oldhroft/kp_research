@@ -132,8 +132,8 @@ class TestAddLags:
         assert df_new.shape == DF.shape
 
 
-from sklearn.metrics import f1_score
 from numpy import array, sqrt
+from sklearn.metrics import f1_score
 
 def test_columnwise_score():
 
