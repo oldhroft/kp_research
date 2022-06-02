@@ -199,12 +199,12 @@ def validate_keras_cv(model: FunctionType, init_params: dict,
     best_param = None
     results = []
 
-    if n_iter is not None:
+    if n_iter is None:
         grid = list(_create_param_grid(params))
     else:
         grid = _random_param_grid(params, n_iter=n_iter, seed=seed)
 
-    for param in _create_param_grid(params):
+    for param in grid:
         start_time = time.time()
         if seed is not None: set_seed(seed)
         if verbose: print('Fitting param {}'.format(param))
