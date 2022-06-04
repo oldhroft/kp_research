@@ -1,5 +1,7 @@
 import pytest
 
+from scripts.helpers.yaml_utils import load_yaml
+
 from ..helpers.utils import *
 from ..helpers.utils import _choose_suffix_name
 import os
@@ -164,7 +166,46 @@ def test_columnwise_score():
     diff = sqrt(((true_scores - score) ** 2).sum())
     assert diff < 1e-5
 
-from ..helpers.utils import _create_param_grid, _random_param_grid
+def test_columnwise_confusion_matrix():
+
+    '''
+    first_column:
+        0: Precision: 0.5, Recall: 1., F1: 2 / 3
+        1: Precision: 1, Recall: 0,5, F1: 2 / 3
+        macro: 2 / 3s
+    second_column:
+        0: F1: 1
+        1: F1: 1
+        macro: 1
+    '''
+
+    y_true = [
+        [1, 0],
+        [1, 1],
+        [0, 1]
+    ]
+
+    y_pred = [
+        [0, 0],
+        [1, 1],
+        [0, 1]
+    ]
+
+    categories = [0, 1,]
+    matrices = columnwise_confusion_matrix(y_pred, y_true, categories)
+
+    assert len(matrices) == 2
+
+    matrix_0 = array([
+        [1, 0],
+        [1, 1],
+    ])
+
+    diff = sqrt(((matrix_0 - matrices[0].values) ** 2).sum())
+
+    assert diff < 1e-5
+
+from ..helpers.utils import _create_param_grid
 
 def test__create_param_grid():
     initial_grid = {
@@ -192,28 +233,111 @@ def test__create_param_grid():
 
     assert final_grid == final_grid_res
 
-def test__random_param_grid():
-    initial_grid = {
-        'first': [1, 2, 4, 5, 6, 7, 8, 9, 10],
-        "second": [2, 3, 28, 2, 2, 3, 49, 3],
-        'third': [6, 5, 4, 3]
+
+from sklearn.linear_model import RidgeClassifier
+from ..pipeline.preprocess import preprocess_3h
+from ..pipeline.data_pipe import LagDataPipe, SequenceDataPipe
+from sklearn.metrics import f1_score
+
+def test_validate():
+
+    def _ridge(**kwargs):
+        return RidgeClassifier(**kwargs)
+    
+    df = DF.pipe(preprocess_3h)
+    
+    config = load_yaml('scripts/tests/test_yamls/test_vars.yaml')
+    data_pipeline = LagDataPipe(**config)
+    X_train, y_train, _ = data_pipeline.fit_transform(df)
+    X_val, y_val = X_train[-10:], y_train[-10:]
+    init_params = {
+        'alpha': 1
     }
 
-    random_grid = _random_param_grid(initial_grid, seed=18, n_iter=12)
-
-    assert len(random_grid) == 12
-    assert 'third' in random_grid[0]
-
-def test__random_param_grid_seed():
-
-    initial_grid = {
-        'first': [1, 2, 4, 5, 6, 7, 8, 9, 10],
-        "second": [2, 3, 28, 2, 2, 3, 49, 3],
-        'third': [6, 5, 4, 3]
+    gv_params = {
+        "scoring": "f1_macro",
+        "verbose": 2
     }
 
-    random_grid1 = _random_param_grid(initial_grid, seed=18, n_iter=12)
-    random_grid2 = _random_param_grid(initial_grid, seed=18, n_iter=12)
+    param_grids = {
+        "alpha": [1, .2, 3, 4]
+    }
 
-    assert str(random_grid1) == str(random_grid2)
+    best_score, _, _ = validate(_ridge, init_params,
+                                param_grids,
+                                X_train, y_train[:, 0],
+                                X_val, y_val[:, 0], **gv_params)
+    
+    assert isinstance(best_score, float)
 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers as L
+
+def test_validate_keras():
+
+    def perceptron(input_shape: tuple, n_classes: int=3, units_array: list=[10], 
+                    optimizer: str='adam') -> Sequential:
+
+        model = Sequential([
+            L.Input(shape=input_shape),
+            *(L.Dense(units=units, activation='relu') for units in units_array),
+            L.Dense(units=n_classes, activation='softmax')  
+        ])
+
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+
+        return model
+    
+    df = DF.pipe(preprocess_3h)
+    print(df.shape)
+    config = load_yaml('scripts/tests/test_yamls/test_vars.yaml')
+    config['backward_steps'] = 1
+    data_pipeline = LagDataPipe(**config)
+    X_train, y_train, _ = data_pipeline.fit_transform(df)
+    print(X_train.shape)
+    X_val, y_val = X_train[-10:], y_train[-10:]
+    init_params = {
+        "optimizer": "adam",
+        "input_shape": X_train.shape[1: ],
+        "n_classes": 2,
+    }
+
+    gv_params = {
+        "scoring": "f1_macro",
+        "verbose": 2
+    }
+
+    param_grids = {
+        "units_array": [[1]],
+    }
+
+    callback_params = {
+        "monitor": "val_loss",
+        "patience": 10,
+        "restore_best_weights": True,
+    }
+
+    scoring_params = {
+        "average": "macro",
+    }
+
+    fit_params = {
+        "epochs": 2,
+        "validation_split": 0.1,
+        "verbose": 2,
+    }
+    gv_params = {
+        "verbose": 2,
+        "seed": 17,
+    }
+
+    _, best_score, _ = validate_keras(perceptron, init_params,
+                                      param_grids,
+                                      f1_score, X_train, y_train[:, 0],
+                                      X_val, y_val[:, 0],
+                                      callback_params,
+                                      scoring_params,
+                                      fit_params,
+                                      **gv_params)
+    
+    assert isinstance(best_score, float)
