@@ -134,6 +134,36 @@ class KerasModels:
         
         model.compile(loss='categorical_crossentropy', optimizer=optimizer)
         return model
+        
+    def bi_lstm(input_shape, n_classes, units_array, optimizer, ):
+        
+        model = Sequential([
+            L.Input(shape=input_shape),
+            *(L.Bidirectional(L.LSTM(i, return_sequences=True, ))
+            for i in units_array['rnn'][:-1]),
+            L.Bidirectional(L.LSTM(units_array['rnn'][-1])),
+            *(L.Dense(units=units, activation='relu') 
+            for units in units_array['dense']),
+            L.Dense(n_classes, activation='softmax')
+        ], )
+        
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+        return model
+
+    def bi_gru(input_shape, n_classes, units_array, optimizer, ):
+        
+        model = Sequential([
+            L.Input(shape=input_shape),
+            *(L.Bidirectional(L.GRU(i, return_sequences=True, ))
+            for i in units_array['rnn'][:-1]),
+            L.Bidirectional(L.GRU(units_array['rnn'][-1])),
+            *(L.Dense(units=units, activation='relu') 
+            for units in units_array['dense']),
+            L.Dense(n_classes, activation='softmax')
+        ], )
+        
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+        return model
 
 from sklearn.model_selection import StratifiedKFold, TimeSeriesSplit
 

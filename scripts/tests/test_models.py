@@ -44,6 +44,14 @@ def test_model_buold_lstm_from_factory():
     model = nn_model_factory.get("lstm", **CONF['rnn']['init_params'])
     assert len(model.layers) == 4, "LSTM shape not correct"
 
+def test_model_buold_bi_gru_from_factory():
+    model = nn_model_factory.get("bi_gru", **CONF['rnn']['init_params'])
+    assert len(model.layers) == 4, "GRU shape not correct"
+
+def test_model_buold_bi_lstm_from_factory():
+    model = nn_model_factory.get("bi_lstm", **CONF['rnn']['init_params'])
+    assert len(model.layers) == 4, "LSTM shape not correct"
+
 def test_model_buold_perceptron_from_factory():
     model = nn_model_factory.get("perceptron", **CONF['perceptron']['init_params'])
     assert len(model.layers) == 3, "Perceptron shape not correct"
