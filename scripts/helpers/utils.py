@@ -1,6 +1,8 @@
 import os
 from typing import List
 
+from scipy import rand
+
 def create_folder(name: str) -> None:
     if not os.path.exists(name):
         os.mkdir(name)
@@ -217,7 +219,8 @@ def validate_keras_cv(model: FunctionType, init_params: dict,
             callbacks_list = [
                 callbacks.EarlyStopping(**callback_params),
             ]
-            
+            random.seed(seed)
+            random.shuffle(train_idx)
             model_param = model(**full_params)
             X_train, y_train = X[train_idx], y[train_idx]
             X_test, y_test = X[test_idx], y[test_idx]
