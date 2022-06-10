@@ -39,12 +39,18 @@ The folliwing run files are available
 All run files have following arguments:
 
 Required:
+
     --folder A folder to save the results
+
 Optional:
     --vars Path to yaml file with config. It is recommended to use the option
+
     --data Path to data
+
     --model A specific model to run. If not specified, scripts run all models in configuration
-    --conf Array. Enviroment variable to define in script (--conf "variable1=value1" "variable2=value2").
+
+    --conf Array. Enviroment variable to define in script (--conf "variable1=value1" "variable2=value2")
+
     --save_models Flag to save the model
 
 ## Examples
@@ -96,8 +102,11 @@ To generate report from folder run:
 python generate_report.py --folder <YOUR-FOLDER-NAME> [--imp]
 ```
 Required:
+
     --folder A folder to generate report from
+
 Optional:
+
     --imp The flag to include feature importance report
 
 The report will be available at YOUR-FOLDER-NAME/report
