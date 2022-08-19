@@ -3,7 +3,6 @@ import pytest
 from scripts.helpers.yaml_utils import load_yaml
 
 from ..helpers.utils import *
-from ..helpers.utils import _choose_suffix_name
 import os
 
 
@@ -57,12 +56,6 @@ def test_add_to_environ():
     add_to_environ(sample_conf)
     assert os.environ["folder"] == "test_folder"
     assert os.environ["variable"] == "2"
-
-
-def test__choose_suffix_name():
-    assert _choose_suffix_name(True, "future") == "future", "Unexpected suffix name"
-    assert _choose_suffix_name(False, None) == "lag", "Unexpected suffix name"
-    assert _choose_suffix_name(True, None) == "lead", "Unexpected suffix name"
 
 
 from ..helpers.utils import _trim

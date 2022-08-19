@@ -30,13 +30,6 @@ def decorate_class(decorator):
     return _decorate_class
 
 
-def _choose_suffix_name(forward: bool, suffix_name: str) -> str:
-    if suffix_name is not None:
-        return suffix_name
-    else:
-        return "lead" if forward else "lag"
-
-
 from pandas import DataFrame, Series
 
 
@@ -59,7 +52,8 @@ def add_lags(
     return_cols=False,
 ) -> DataFrame:
 
-    suffix_name = _choose_suffix_name(forward, suffix_name)
+    if suffix_name is None:
+        suffix_name = "lead" if forward else "lag"
 
     x = df.copy()
 
