@@ -6,33 +6,38 @@ import os
 
 from .utils import create_folder
 
-class StreamToLogger(object): # pragma: no cover
+
+class StreamToLogger(object):  # pragma: no cover
     """
     Fake file-like stream object that redirects writes to a logger instance.
     """
+
     def __init__(self, logger, level):
-       self.logger = logger
-       self.level = level
-       self.linebuf = ''
+        self.logger = logger
+        self.level = level
+        self.linebuf = ""
 
     def write(self, buf):
-       for line in buf.rstrip().splitlines():
-          self.logger.log(self.level, line.rstrip())
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.level, line.rstrip())
 
     def flush(self):
         pass
+
 
 def config_logger(logger, proc_name: str, folder: str) -> None:
 
     handler = logging.StreamHandler(sys.stdout)
 
-    log_folder = os.path.join(folder, f'log_{proc_name}')
+    log_folder = os.path.join(folder, f"log_{proc_name}")
     create_folder(log_folder)
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    filename = os.path.join(log_folder, f'log_{now}.log')
-    file_handler = logging.FileHandler(filename, mode='w', encoding='utf-8')
-    
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    filename = os.path.join(log_folder, f"log_{now}.log")
+    file_handler = logging.FileHandler(filename, mode="w", encoding="utf-8")
+
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -42,16 +47,23 @@ def config_logger(logger, proc_name: str, folder: str) -> None:
     sys.stdout = StreamToLogger(logger, logging.INFO)
     sys.stderr = StreamToLogger(logger, logging.ERROR)
 
+
 from argparse import ArgumentParser
 
-def create_argparser() -> ArgumentParser: # pragma: no cover
+
+def create_argparser() -> ArgumentParser:  # pragma: no cover
     parser = ArgumentParser()
 
-    parser.add_argument('--folder', action='store', type=str, required=True)
-    parser.add_argument('--model', action='store', type=str, required=False, default=None)
-    parser.add_argument('--vars', action='store', type=str, required=False, default=None)
-    parser.add_argument('--data', action='store', type=str, required=False, default=None)
-    parser.add_argument('--conf', nargs='+', default=[])
-    parser.add_argument('--save_models', action='store_true')
+    parser.add_argument("--folder", action="store", type=str, required=True)
+    parser.add_argument(
+        "--model", action="store", type=str, required=False, default=None
+    )
+    parser.add_argument(
+        "--vars", action="store", type=str, required=False, default=None
+    )
+    parser.add_argument(
+        "--data", action="store", type=str, required=False, default=None
+    )
+    parser.add_argument("--conf", nargs="+", default=[])
+    parser.add_argument("--save_models", action="store_true")
     return parser
-
