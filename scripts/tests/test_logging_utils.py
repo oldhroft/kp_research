@@ -3,7 +3,7 @@ import glob
 import os
 import shutil
 
-from ..helpers.logging_utils import config_logger
+from scripts.helpers.logging_utils import config_logger
 
 
 def test_config_logger():

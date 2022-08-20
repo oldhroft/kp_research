@@ -1,7 +1,7 @@
-from ..models.models import *
-from ..models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
+from scripts.models.models import *
+from scripts.models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
 
-from ..helpers.yaml_utils import load_yaml
+from scripts.helpers.yaml_utils import load_yaml
 
 
 def test_sklearn_models():

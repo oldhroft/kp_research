@@ -1,7 +1,7 @@
 import pytest
 
-from ..models.factory import *
-from ..models import sk_model_factory
+from scripts.models.factory import *
+from scripts.models import sk_model_factory
 
 
 def test_model_factory():

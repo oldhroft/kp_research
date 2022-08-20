@@ -1,7 +1,7 @@
 from pandas import read_csv
 
-from ..pipeline.preprocess import *
-from ..helpers.yaml_utils import load_yaml
+from scripts.pipeline.preprocess import *
+from scripts.helpers.yaml_utils import load_yaml
 
 
 def test_categorize():

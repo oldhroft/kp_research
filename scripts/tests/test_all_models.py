@@ -1,4 +1,4 @@
-from ..models import sk_model_factory, nn_model_factory
+from scripts.models import sk_model_factory, nn_model_factory
 
 
 def test_sk_model_factory_build():

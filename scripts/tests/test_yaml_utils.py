@@ -1,5 +1,5 @@
 import os
-from ..helpers.yaml_utils import *
+from scripts.helpers.yaml_utils import *
 
 
 class TestYamlLoad:

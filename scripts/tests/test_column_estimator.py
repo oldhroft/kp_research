@@ -1,10 +1,10 @@
 from pandas import read_csv
 from numpy import sqrt, array
 
-from ..models.column_estimator import ColumnEstimator
-from ..pipeline.data_pipe import LagDataPipe
-from ..pipeline.preprocess import preprocess_3h, categorize
-from ..helpers.yaml_utils import load_yaml
+from scripts.models.column_estimator import ColumnEstimator
+from scripts.pipeline.data_pipe import LagDataPipe
+from scripts.pipeline.preprocess import preprocess_3h, categorize
+from scripts.helpers.yaml_utils import load_yaml
 
 
 def test_column_estimator():

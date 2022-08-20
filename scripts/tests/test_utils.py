@@ -2,7 +2,7 @@ import pytest
 
 from scripts.helpers.yaml_utils import load_yaml
 
-from ..helpers.utils import *
+from scripts.helpers.utils import *
 import os
 
 
