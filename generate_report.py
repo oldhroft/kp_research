@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 from pandas import concat, read_csv, DataFrame
 from tqdm import tqdm
+from typing import List
 
 from scripts.helpers.utils import create_folder
 from scripts.helpers.yaml_utils import load_yaml
@@ -60,19 +61,23 @@ def _extract_feature_importances(model: Any, features: list) -> DataFrame:
     return DataFrame(importances, index=features)
 
 
+def concat_save(folder: str, output_path: str, format: str = "csv") -> None:
+    format = f"*.{format}"
+    files = glob.glob(os.path.join(folder, format))
+    df = concat(
+        (read_file(file) for file in files),
+        axis=1,
+    )
+    df.to_excel(output_path)
+
+
 if __name__ == "__main__":
 
     arguments = create_argparser().parse_args()
     folder = arguments.folder
     report_path = os.path.join(folder, "report")
     create_folder(report_path)
-    files = glob.glob(os.path.join(folder, "*.csv"))
-
-    df = concat(
-        (read_file(file) for file in files),
-        axis=1,
-    )
-    df.to_excel(os.path.join(report_path, "report.xlsx"))
+    concat_save(folder, os.path.join(report_path, "report.xlsx"), "csv")
 
     if arguments.imp:
         importances_folder = os.path.join(report_path, "feature_importances")
