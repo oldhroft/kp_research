@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Any, List, Dict, Callable
 
 
 def create_folder(name: str) -> None:
@@ -13,8 +13,8 @@ def add_to_environ(data: List[str]) -> None:
         os.environ[key] = value
 
 
-def decorate_class(decorator):
-    def _decorate_class(cls):
+def decorate_class(decorator: Callable) -> Callable:
+    def _decorate_class(cls: type):
 
         method_list = [
             func
@@ -106,11 +106,10 @@ def add_lags(
 
 
 from sklearn.metrics import confusion_matrix
-from types import FunctionType
 
 
 def columnwise_score(
-    scoring_func: FunctionType, preds_df: DataFrame, true_df: DataFrame, **kwargs
+    scoring_func: Callable, preds_df: DataFrame, true_df: DataFrame, **kwargs
 ) -> Series:
 
     score = Series(dtype="float64")
@@ -126,7 +125,7 @@ def columnwise_score(
 
 def columnwise_confusion_matrix(
     preds_df: DataFrame, y_true_df: DataFrame, categories: list
-) -> list:
+) -> Dict[Any, Any]:
 
     preds_df = DataFrame(preds_df)
     y_true_df = DataFrame(y_true_df)
@@ -155,16 +154,16 @@ def _create_param_grid(params: dict) -> map:
 
 
 def validate(
-    model: FunctionType,
+    model: Callable,
     init_params: dict,
-    params: list,
+    params: dict,
     X_train: array,
     y_train: array,
     X_val: array,
     y_val: array,
     scoring: str,
     verbose: int = 1,
-) -> list:
+) -> tuple:
 
     best_score = 0
     best_param = None
@@ -203,14 +202,14 @@ from tensorflow.keras import callbacks as callbacks
 try:
     from tensorflow.random import set_seed
 except ImportError:
-    from tensorflow import random as random
+    from tensorflow import random as random_tf
 
-    set_seed = random.set_seed
+    set_seed = random_tf.set_seed
 
 import random
 
 
-def _random_param_grid(params: dict, n_iter: int, seed: int):
+def _random_param_grid(params: dict, n_iter: int, seed: int) -> list:
     grid = list(_create_param_grid(params))
     random.seed(seed)
     random.shuffle(grid)
@@ -218,11 +217,11 @@ def _random_param_grid(params: dict, n_iter: int, seed: int):
 
 
 def validate_keras_cv(
-    model: FunctionType,
+    model: Callable,
     init_params: dict,
     cv: BaseCrossValidator,
     params: dict,
-    scoring: FunctionType,
+    scoring: Callable,
     X: array,
     y: array,
     callback_params: dict,
@@ -231,7 +230,7 @@ def validate_keras_cv(
     verbose: bool,
     seed: int,
     n_iter: int = None,
-) -> list:
+) -> tuple:
     best_score = 0
     best_param = None
     results = []
@@ -284,10 +283,10 @@ def validate_keras_cv(
 
 
 def validate_keras(
-    model: FunctionType,
+    model: Callable,
     init_params: dict,
     params: dict,
-    scoring: FunctionType,
+    scoring: Callable,
     X_train: array,
     y_train: array,
     X_val: array,
@@ -297,7 +296,7 @@ def validate_keras(
     fit_params: dict,
     verbose: bool,
     seed: int,
-) -> list:
+) -> tuple:
 
     best_score = 0
     best_param = None

@@ -25,8 +25,10 @@ from scripts.helpers.utils import (
 from scripts.models import nn_model_factory, sk_model_factory, gcv_factory
 from scripts.pipeline.preprocess import preprocess_3h
 
+from typing import Dict, Any
 
-def read_data(path, val=False):
+
+def read_data(path: str, val: bool=False) -> tuple:
     if path is None:
         path = (
             "./data/All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv"
@@ -56,12 +58,12 @@ def read_data(path, val=False):
 from importlib import import_module
 
 
-def get_data_pipeline(config):
+def get_data_pipeline(config: Dict[str, Any]) -> Any:
     cls = getattr(import_module("scripts.pipeline.data_pipe"), config["pipe_name"])
     return cls(**config["pipe_params"])
 
 
-def create_folder_structure(root: str) -> dict:
+def create_folder_structure(root: str) -> Dict[str, str]:
 
     os.environ["FOLDER"] = root
     structure = {"root": root}
@@ -140,7 +142,7 @@ def fit_keras(
     return models, histories
 
 
-def score(model, model_name, X_test, y_test, structure, proc_name):
+def score(model, model_name, X_test, y_test, structure: Dict[str, str], proc_name):
     preds = squeeze(model.predict(X_test))
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average="macro")
     fname = os.path.join(structure["root"], f"{proc_name}_{model_name}_f1.csv")
@@ -154,7 +156,7 @@ def score(model, model_name, X_test, y_test, structure, proc_name):
         )
 
 
-def score_keras(model, model_name, X_test, y_test, structure, proc_name):
+def score_keras(model, model_name, X_test, y_test, structure: Dict[str, str], proc_name):
     preds = {}
 
     for i in range(y_test.shape[1]):
@@ -175,7 +177,7 @@ def score_keras(model, model_name, X_test, y_test, structure, proc_name):
 def save_cv_results(
     results: DataFrame,
     model_name: str,
-    structure: str,
+    structure: Dict[str, str],
     proc_name: str,
 ) -> None:
     filename = os.path.join(
@@ -187,7 +189,7 @@ def save_cv_results(
 def save_history(
     history,
     model_name: str,
-    structure: str,
+    structure: Dict[str, str],
     proc_name: str,
 ) -> None:
     for col, item in history.items():
@@ -201,7 +203,7 @@ def save_history(
 def save_model(
     model,
     model_name: str,
-    structure: str,
+    structure: Dict[Any, Any],
     proc_name: str,
 ):
     filename = os.path.join(
@@ -213,7 +215,7 @@ def save_model(
 def save_model_keras(
     model,
     model_name: str,
-    structure: str,
+    structure: Dict[str, str],
     proc_name: str,
 ):
 

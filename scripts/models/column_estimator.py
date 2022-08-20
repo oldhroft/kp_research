@@ -8,9 +8,9 @@ class ColumnEstimator(BaseEstimator):
     def __init__(self, column_idx: int = 0):
         self.column_idx = column_idx
 
-    def fit(self, X, y):
+    def fit(self, X: array, y: array):
         self.classes_ = unique(y)
         return self
 
-    def predict(self, X):
+    def predict(self, X: array):
         return array(list(map(categorize, list(X[:, self.column_idx]))))

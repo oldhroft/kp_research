@@ -1,7 +1,9 @@
 import datetime
 
+from typing import Union
 
-def categorize(x):
+
+def categorize(x: Union[float, int]) -> int:
     if x <= 30:
         return 0
     elif x <= 50:
@@ -10,7 +12,10 @@ def categorize(x):
         return 2
 
 
-def preprocess_3h(df):
+from pandas import DataFrame
+
+
+def preprocess_3h(df: DataFrame) -> DataFrame:
 
     x = df.copy()
 
@@ -28,7 +33,6 @@ def preprocess_3h(df):
 
 
 from sklearn.preprocessing import StandardScaler
-from pandas import DataFrame
 from numpy import array
 
 
@@ -36,7 +40,7 @@ def _select(df: DataFrame, columns: list) -> DataFrame:
     return df.loc[:, columns]
 
 
-def _split_and_drop(data_tuple: tuple, drop_columns) -> tuple:
+def _split_and_drop(data_tuple: tuple, drop_columns: list) -> tuple:
     df = data_tuple[0]
     y_columns = data_tuple[1]
     return df.drop(y_columns + drop_columns, axis=1), df.loc[:, y_columns]
@@ -62,25 +66,25 @@ def _as_numpy(data_tuple: tuple) -> tuple:
 
 
 class _StandardScalerXY(StandardScaler):
-    def fit(self, data_tuple: tuple):
+    def fit(self, data_tuple: tuple) -> None:
         return super().fit(data_tuple[0])
 
     def transform(
         self,
         data_tuple: tuple,
-    ):
+    ) -> tuple:
         X_scaled = super().transform(data_tuple[0])
         return tuple([X_scaled, *data_tuple[1:]])
 
-    def fit_transform(self, data_tuple: tuple):
+    def fit_transform(self, data_tuple: tuple) -> tuple:
         return self.fit(data_tuple).transform(data_tuple)
 
 
-def _reshape(data_tuple, n_features, time_steps):
+def _reshape(data_tuple, n_features, time_steps) -> tuple:
     X = data_tuple[0].reshape((-1, time_steps, n_features))
     y = data_tuple[1]
     return X, y
 
 
-def _pack_with_array(data_tuple, array):
+def _pack_with_array(data_tuple, array) -> tuple:
     return tuple((*data_tuple, array))

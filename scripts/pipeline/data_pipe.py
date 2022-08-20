@@ -1,8 +1,11 @@
+from typing import Any, List, Tuple, Union
+
+
 class DataPipe(object):
-    def __init__(self, steps) -> None:
+    def __init__(self, steps: List[Tuple[Any, Any, bool]]) -> None:
         self.steps = steps
 
-    def fit_transform(self, X):
+    def fit_transform(self, X: Any):
 
         self.fitted_steps = []
         for step, arg, is_fittable in self.steps:
@@ -15,7 +18,7 @@ class DataPipe(object):
             self.fitted_steps.append((step, arg))
         return X
 
-    def transform(self, X):
+    def transform(self, X: Any):
         for step, arg in self.fitted_steps:
             X = step(X, **arg)
         return X
@@ -35,14 +38,14 @@ from scripts.pipeline.preprocess import _StandardScalerXY
 class LagDataPipe(DataPipe):
     def __init__(
         self,
-        variables,
-        target,
-        backward_steps,
-        forward_steps,
-        scale=False,
-        shuffle=True,
-        random_state=None,
-    ):
+        variables: list,
+        target: Any,
+        backward_steps: int,
+        forward_steps: int,
+        scale: bool = False,
+        shuffle: bool = True,
+        random_state: Union[int, None] = None,
+    ) -> None:
         self.steps = [
             (_select, {"columns": variables + [target]}, False),
             (
@@ -82,13 +85,13 @@ from scripts.pipeline.preprocess import _reshape, _pack_with_array
 class SequenceDataPipe(LagDataPipe):
     def __init__(
         self,
-        variables,
-        target,
-        backward_steps,
-        forward_steps,
-        scale=False,
-        shuffle=True,
-        random_state=None,
+        variables: list,
+        target: Any,
+        backward_steps: int,
+        forward_steps: int,
+        scale: bool = False,
+        shuffle: bool = True,
+        random_state: Union[int, None] = None,
     ):
 
         super().__init__(
