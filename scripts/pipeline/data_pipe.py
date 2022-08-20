@@ -24,7 +24,7 @@ class DataPipe(object):
         return X
 
 
-from ..helpers.utils import add_lags
+from scripts.helpers.utils import add_lags
 from scripts.pipeline.preprocess import (
     _as_numpy,
     _get_feature_names,

@@ -1,5 +1,5 @@
 from sklearn.base import BaseEstimator
-from ..pipeline.preprocess import categorize
+from scripts.pipeline.preprocess import categorize
 
 from numpy import unique, array
 

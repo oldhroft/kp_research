@@ -58,7 +58,7 @@ def test_add_to_environ():
     assert os.environ["variable"] == "2"
 
 
-from ..helpers.utils import _trim
+from scripts.helpers.utils import _trim
 from pandas import read_csv
 
 DF = read_csv("scripts/tests/test_data/test.csv")

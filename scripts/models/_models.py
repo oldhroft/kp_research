@@ -1,4 +1,4 @@
-from .factory import *
+from scripts.models.factory import *
 
 sk_model_factory = SklearnModelFactory()
 nn_model_factory = KerasModelFactory()

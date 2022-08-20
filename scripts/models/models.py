@@ -13,9 +13,9 @@ from .column_estimator import ColumnEstimator
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import make_pipeline as make_pipeline_imb
 
-from .factory import register_model
-from ._models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
-from ..helpers.utils import decorate_class
+from scripts.models.factory import register_model
+from scripts.models._models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
+from scripts.helpers.utils import decorate_class
 
 
 @decorate_class(staticmethod)
