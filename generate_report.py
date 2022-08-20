@@ -1,5 +1,6 @@
 import glob
 import os
+from typing import Any
 import joblib
 
 from argparse import ArgumentParser
@@ -27,7 +28,7 @@ def read_file(fname: str) -> DataFrame:
     return read_csv(fname, index_col=0, squeeze=True).rename(name).to_frame()
 
 
-def _extract_feature_importances(model, features):
+def _extract_feature_importances(model: Any, features: list) -> DataFrame:
 
     importances = {}
     k = 0

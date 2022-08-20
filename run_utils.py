@@ -28,7 +28,7 @@ from scripts.pipeline.preprocess import preprocess_3h
 from typing import Dict, Any
 
 
-def read_data(path: str, val: bool=False) -> tuple:
+def read_data(path: str, val: bool = False) -> tuple:
     if path is None:
         path = (
             "./data/All_browse_data_без_погружения_19971021_20211231_с_пропусками.csv"
@@ -99,7 +99,14 @@ def _convert_to_results(gcv: GridSearchCV) -> DataFrame:
 
 
 def grid_search(
-    params, model_name, init_params, X_train, y_train, cv, gcv_name, gcv_params
+    params: dict,
+    model_name: str,
+    init_params: dict,
+    X_train: Any,
+    y_train: Any,
+    cv: Any,
+    gcv_name: str,
+    gcv_params: dict,
 ):
 
     model = sk_model_factory.get(model_name, **init_params)
@@ -113,7 +120,7 @@ def grid_search(
     return gcv.best_params_, gcv.best_score_, results
 
 
-def fit(model_name, init_params, X_train, y_train):
+def fit(model_name: str, init_params: dict, X_train: Any, y_train: Any):
 
     model = sk_model_factory.get(model_name, **init_params)
     model = MultiOutputClassifier(model)
@@ -122,7 +129,13 @@ def fit(model_name, init_params, X_train, y_train):
 
 
 def fit_keras(
-    model_name, init_params, fit_params, callback_params, X_train, y_train, seed
+    model_name: str,
+    init_params: dict,
+    fit_params: dict,
+    callback_params: dict,
+    X_train: Any,
+    y_train: Any,
+    seed: int,
 ):
 
     models = []
@@ -142,7 +155,14 @@ def fit_keras(
     return models, histories
 
 
-def score(model, model_name, X_test, y_test, structure: Dict[str, str], proc_name):
+def score(
+    model: Any,
+    model_name: str,
+    X_test: Any,
+    y_test: Any,
+    structure: Dict[str, str],
+    proc_name: str,
+) -> None:
     preds = squeeze(model.predict(X_test))
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average="macro")
     fname = os.path.join(structure["root"], f"{proc_name}_{model_name}_f1.csv")
@@ -156,7 +176,14 @@ def score(model, model_name, X_test, y_test, structure: Dict[str, str], proc_nam
         )
 
 
-def score_keras(model, model_name, X_test, y_test, structure: Dict[str, str], proc_name):
+def score_keras(
+    model: Any,
+    model_name: str,
+    X_test: Any,
+    y_test: Any,
+    structure: Dict[str, str],
+    proc_name: str,
+) -> None:
     preds = {}
 
     for i in range(y_test.shape[1]):
@@ -187,7 +214,7 @@ def save_cv_results(
 
 
 def save_history(
-    history,
+    history: Any,
     model_name: str,
     structure: Dict[str, str],
     proc_name: str,
@@ -201,7 +228,7 @@ def save_history(
 
 
 def save_model(
-    model,
+    model: Any,
     model_name: str,
     structure: Dict[Any, Any],
     proc_name: str,
@@ -213,7 +240,7 @@ def save_model(
 
 
 def save_model_keras(
-    model,
+    model: Any,
     model_name: str,
     structure: Dict[str, str],
     proc_name: str,
@@ -239,7 +266,7 @@ def save_vars(config: dict, proc_name: str, model_name: str, structure: dict) ->
 from scripts.models.factory import ModelFactory
 
 
-def check_config(config: dict, factory: ModelFactory):
+def check_config(config: Dict[str, Any], factory: ModelFactory):
     length = 0
     not_in_factory = []
     for item in config["models"]:
