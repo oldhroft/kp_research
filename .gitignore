@@ -12,3 +12,6 @@ test_run
 .pytest_cache
 htmlcov
 catboost_info
+*egg-info
+.vscode
+.mypy_cache
