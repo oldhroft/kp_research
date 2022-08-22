@@ -1,7 +1,12 @@
+import os
+
 from pandas import read_csv
 
 from scripts.pipeline.preprocess import *
 from scripts.helpers.yaml_utils import load_yaml
+
+
+LOCATION = os.path.dirname(os.path.realpath(__file__))
 
 
 def test_categorize():
@@ -10,11 +15,11 @@ def test_categorize():
     assert categorize(30) == 0
 
 
-DF = read_csv("scripts/tests/test_data/test.csv")
+DF = read_csv(os.path.join(LOCATION, "test_data/test.csv"))
 
 
 def test_preprocess_3h():
-    conf = load_yaml("scripts/tests/test_yamls/test_vars.yaml")
+    conf = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
     df = DF.pipe(preprocess_3h)[conf["variables"]]
     assert df.isna().sum().sum() == 0, "NA values are present"
     assert df.shape[0] == DF.shape[0] // 3 + 1, "Shape is not preserved"

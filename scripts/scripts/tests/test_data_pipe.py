@@ -1,4 +1,4 @@
-from turtle import shape
+import os
 from pandas import read_csv
 
 from scripts.pipeline.data_pipe import *
@@ -6,7 +6,9 @@ from scripts.pipeline.preprocess import _select
 
 from scripts.pipeline.preprocess import preprocess_3h
 
-DF = read_csv("scripts/tests/test_data/test.csv").pipe(preprocess_3h)
+LOCATION = os.path.dirname(os.path.realpath(__file__))
+
+DF = read_csv(os.path.join(LOCATION, "test_data/test.csv")).pipe(preprocess_3h)
 
 
 def test_simple_pipe():
@@ -19,7 +21,7 @@ def test_simple_pipe():
 
 from scripts.helpers.yaml_utils import load_yaml
 
-CONF = load_yaml("scripts/tests/test_yamls/test_vars.yaml")
+CONF = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
 
 
 def test_lag_data_pipe():

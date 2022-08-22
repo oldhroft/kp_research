@@ -1,3 +1,5 @@
+import os
+
 from pandas import read_csv
 from sklearn.linear_model import Ridge, RidgeClassifier
 from sklearn.ensemble import RandomForestRegressor
@@ -7,6 +9,7 @@ from numpy.random import choice
 
 from scripts.report.generate_report import basename, get_feature_importances
 
+LOCATION = os.path.dirname(os.path.realpath(__file__))
 
 def test_basename():
     assert basename("/mypath/file.csv") == "file"
@@ -14,7 +17,7 @@ def test_basename():
 
 def test_get_feature_importances():
     data = (
-        read_csv("scripts/tests/test_data/test.csv")
+        read_csv(os.path.join(LOCATION, "test_data/test.csv"))
         .select_dtypes(include=["int64", "float64"])
         .fillna(0)
     )
@@ -69,7 +72,7 @@ from scripts.report.generate_report import get_feature_importances_multi_output
 def test_get_feature_importances_multi_output():
 
     data = (
-        read_csv("scripts/tests/test_data/test.csv")
+        read_csv(os.path.join(LOCATION, "test_data/test.csv"))
         .select_dtypes(include=["int64", "float64"])
         .fillna(0)
     )
@@ -103,16 +106,19 @@ from scripts.helpers.utils import create_folder
 
 @pytest.fixture
 def result_folder():
-    create_folder("scripts/tests/test_concat_result")
-    yield "scripts/tests/test_concat_result/result.xlsx"
-    os.system("rm -rf scripts/tests/test_concat_result")
+    fld = os.path.join(LOCATION, "test_concat_result")
+    create_folder(fld)
+    yield fld
+    os.system(f"rm -rf {fld}")
 
 
 def test_concat_save(result_folder):
-    concat_save("scripts/tests/test_concat", result_folder, "csv")
-    assert os.path.exists("scripts/tests/test_concat_result/result.xlsx")
+    res_path = os.path.join(result_folder, 'result.xlsx')
+    
+    concat_save(os.path.join(LOCATION, "test_concat"), res_path, "csv")
+    assert os.path.exists(res_path)
 
-    df = read_excel("scripts/tests/test_concat_result/result.xlsx", index_col=0)
+    df = read_excel(res_path, index_col=0)
     assert df.shape[0] == 8
     assert df.shape[1] == 2
 
@@ -125,22 +131,24 @@ import glob
 
 @pytest.fixture
 def model_folder():
-    create_folder("scripts/tests/test_model_fi")
-    yield "scripts/tests/test_model_fi"
-    os.system("rm -rf scripts/tests/test_model_fi")
+    fld = os.path.join(LOCATION, 'test_model_fi')
+    create_folder(fld)
+    yield fld
+    os.system(f"rm -rf {fld}")
 
 
 @pytest.fixture
 def fi_folder():
-    create_folder("scripts/fi_folder")
-    yield "scripts/fi_folder"
-    os.system("scripts/fi_folder")
+    fld = os.path.join(LOCATION, 'fi_folder')
+    create_folder(fld)
+    yield fld
+    os.system(f"rm - rf {fld}")
 
 
 def test_extract_fi_from_models(model_folder, fi_folder):
 
     data = (
-        read_csv("scripts/tests/test_data/test.csv")
+        read_csv(os.path.join(LOCATION, "test_data/test.csv"))
         .select_dtypes(include=["int64", "float64"])
         .fillna(0)
     )

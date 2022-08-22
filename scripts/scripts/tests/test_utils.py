@@ -5,14 +5,18 @@ from scripts.helpers.yaml_utils import load_yaml
 from scripts.helpers.utils import *
 import os
 
+LOCATION = os.path.dirname(os.path.realpath(__file__))
+
 
 def test_create_folder():
-    if os.path.exists("scripts/tests/test1"):
-        os.rmdir("scripts/tests/test1")
-    create_folder("scripts/tests/test1")
-    flag = os.path.exists("scripts/tests/test1")
-    os.rmdir("scripts/tests/test1")
-    assert flag, "Folder scripts/tests/test1 not created"
+
+    fp1 = os.path.join(LOCATION, "test1")
+    if os.path.exists(fp1):
+        os.rmdir(fp1)
+    create_folder(fp1)
+    flag = os.path.exists(fp1)
+    os.rmdir(fp1)
+    assert flag, f"Folder {fp1} not created"
 
 
 def test_class_decorator():
@@ -61,7 +65,7 @@ def test_add_to_environ():
 from scripts.helpers.utils import _trim
 from pandas import read_csv
 
-DF = read_csv("scripts/tests/test_data/test.csv")
+DF = read_csv(os.path.join(LOCATION, "test_data/test.csv"))
 
 
 class Test_Trim:
@@ -247,7 +251,7 @@ def test_validate():
 
     df = DF.pipe(preprocess_3h)
 
-    config = load_yaml("scripts/tests/test_yamls/test_vars.yaml")
+    config = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
     data_pipeline = LagDataPipe(**config)
     X_train, y_train, _ = data_pipeline.fit_transform(df)
     X_val, y_val = X_train[-10:], y_train[-10:]
@@ -265,7 +269,7 @@ def test_validate():
         y_train[:, 0],
         X_val,
         y_val[:, 0],
-        **gv_params
+        **gv_params,
     )
 
     assert isinstance(best_score, float)
@@ -297,7 +301,7 @@ def test_validate_keras():
 
     df = DF.pipe(preprocess_3h)
     print(df.shape)
-    config = load_yaml("scripts/tests/test_yamls/test_vars.yaml")
+    config = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
     config["backward_steps"] = 1
     data_pipeline = LagDataPipe(**config)
     X_train, y_train, _ = data_pipeline.fit_transform(df)
@@ -347,7 +351,7 @@ def test_validate_keras():
         callback_params,
         scoring_params,
         fit_params,
-        **gv_params
+        **gv_params,
     )
 
     assert isinstance(best_score, float)

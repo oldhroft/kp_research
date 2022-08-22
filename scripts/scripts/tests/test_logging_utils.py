@@ -5,15 +5,16 @@ import shutil
 
 from scripts.helpers.logging_utils import config_logger
 
+LOCATION = os.path.dirname(os.path.realpath(__file__))
 
 def test_config_logger():
 
     PROC_NAME = "test_proc"
-    folder = "scripts/tests"
+    folder = LOCATION
 
     logger = logging.getLogger(__name__)
     config_logger(logger, PROC_NAME, folder)
-    log_folder = f"scripts/tests/log_{PROC_NAME}"
+    log_folder = os.path.join(folder, f"log_{PROC_NAME}")
 
     logger.info("sample info")
 

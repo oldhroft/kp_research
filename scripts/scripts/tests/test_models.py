@@ -1,7 +1,10 @@
+import os
+
 from scripts.models.models import *
 from scripts.models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
-
 from scripts.helpers.yaml_utils import load_yaml
+
+LOCATION = os.path.dirname(os.path.realpath(__file__))
 
 
 def test_sklearn_models():
@@ -29,7 +32,7 @@ def test_sklearn_models_build():
         assert hasattr(getattr(SkLearnModels, method)(), "predict")
 
 
-CONF = load_yaml("scripts/tests/test_yamls/nn_conf.yaml")
+CONF = load_yaml(os.path.join(LOCATION, "test_yamls/nn_conf.yaml"))
 
 
 def test_model_buold_gru():
