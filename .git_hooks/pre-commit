@@ -1,6 +1,6 @@
 #!/bin/bash
-source ~/.bash_profile
-conda activate tf
+source ~/.zprofile
+conda activate tf_kp
 
 coverage run -m pytest scripts
 python cov_utils/get_coverage.py

@@ -13,3 +13,4 @@ test_run
 htmlcov
 catboost_info
 *.json
+!requirements.txt
