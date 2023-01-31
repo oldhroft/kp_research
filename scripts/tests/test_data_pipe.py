@@ -1,4 +1,3 @@
-from turtle import shape
 from pandas import read_csv
 
 from scripts.pipeline.data_pipe import *

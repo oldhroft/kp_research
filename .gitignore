@@ -12,3 +12,4 @@ test_run
 .pytest_cache
 htmlcov
 catboost_info
+*.json
