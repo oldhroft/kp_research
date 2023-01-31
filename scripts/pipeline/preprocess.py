@@ -1,8 +1,8 @@
 import datetime
 
 def categorize(x):
-    if x <= 30: return 0
-    elif x <= 50: return 1
+    if x <= 17: return 0
+    elif x <= 33: return 1
     else: return 2
 
 def preprocess_3h(df):
