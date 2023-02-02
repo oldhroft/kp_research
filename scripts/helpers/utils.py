@@ -1,8 +1,6 @@
 import os
 from typing import List
 
-from scipy import rand
-
 def create_folder(name: str) -> None:
     if not os.path.exists(name):
         os.mkdir(name)
@@ -227,7 +225,7 @@ def validate_keras_cv(model: FunctionType, init_params: dict,
             y_train = array(get_dummies(y_train))
             model_param.fit(X_train, y_train, callbacks=callbacks_list,
                             **fit_params)
-            y_preds = model_param.predict(X_test).argmax(axis=1)
+            y_preds = model_param.predict(X_test, verbose=0).argmax(axis=1)
             score = scoring(y_preds, y_test, **scoring_params)
             sub_scores.append(score)
             result_dict = {

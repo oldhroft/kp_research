@@ -28,17 +28,15 @@ def read_data(path, val=False):
     
     categories = list(df.category.unique())
 
-    df = df.set_index('dttm')
-
-    df_test = df.last('730d')
-    df_train = df.drop(df_test.index)
+    df_test = df.loc[df.year >= 2020].reset_index(drop=True)
+    df_train = df.loc[df.year < 2020].reset_index(drop=True)
 
     if val:
-        df_val = df_train.last('730d')
-        df_train = df_train.drop(df_val.index)
-        return df_train.reset_index(), df_val.reset_index(), df_test.reset_index(), categories
+        df_val = df_train.loc[df.year >= 2018].reset_index(drop=True)
+        df_train = df_train.loc[df.year < 2018].reset_index(drop=True)
+        return df_train, df_val, df_test, categories
     else:
-        return df_train.reset_index(), df_test.reset_index(), categories
+        return df_train, df_test, categories
 
 from importlib import import_module
 
@@ -130,7 +128,7 @@ def score_keras(model, model_name, X_test, y_test, structure, proc_name):
     preds= {}
 
     for i in range(y_test.shape[1]):
-        preds[i] = model[i].predict(X_test).argmax(axis=1)
+        preds[i] = model[i].predict(X_test, verbose=0).argmax(axis=1)
     preds = DataFrame(preds)
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average='macro')
     fname = os.path.join(structure['root'], f'{proc_name}_{model_name}_f1.csv')
@@ -161,7 +159,7 @@ def save_model_keras(model, model_name: str, structure: str, proc_name: str,):
 
     for i, model_ in enumerate(model):
         filename = os.path.join(structure['model_path'], 
-                                f'{proc_name}_{model_name}_{i}_model')
+                                f'{proc_name}_{model_name}_{i}_model.h5')
         model_.save(filename)
 
 def save_vars(config: dict, proc_name: str, model_name: str, structure: dict) -> None:
