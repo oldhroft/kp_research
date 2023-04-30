@@ -22,9 +22,12 @@ from scripts.models import nn_model_factory, sk_model_factory, gcv_factory
 from scripts.pipeline.preprocess import preprocess_3h
 
 
-def read_data(path, val=False):
+def read_data(path, date_from=None, val=False):
     df = read_csv(
         path, encoding='cp1251', na_values='N').pipe(preprocess_3h)
+    
+    if date_from is not None:
+        df = df.loc[df.dttm >= date_from].reset_index(drop=True)
     
     categories = list(df.category.unique())
 

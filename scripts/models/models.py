@@ -2,7 +2,7 @@ from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import RidgeClassifier, LogisticRegression
+from sklearn.linear_model import RidgeClassifier, LogisticRegression, Lasso, ElasticNet
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.dummy import DummyClassifier
@@ -27,6 +27,12 @@ class SkLearnModels():
 
     def ridge():
         return make_pipeline(StandardScaler(), RidgeClassifier())
+
+    def lasso():
+        return make_pipeline(StandardScaler(), Lasso())
+
+    def elastic_net():
+        return make_pipeline(StandardScaler(), ElasticNet())  
 
     def lr():
         return make_pipeline(StandardScaler(), LogisticRegression())

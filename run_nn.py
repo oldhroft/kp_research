@@ -25,7 +25,7 @@ if __name__ == '__main__':
     config_global = load_yaml(vars_path)
     check_config(config_global, nn_model_factory)
         
-    df_train, df_test, categories = read_data(config_global["data"]["path"])
+    df_train, df_test, categories = read_data(**config_global["data"])
 
     for model_name, config in config_global['models'].items():
 

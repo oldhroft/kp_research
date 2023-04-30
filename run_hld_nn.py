@@ -29,7 +29,7 @@ if __name__ == '__main__':
     config_global = load_yaml(vars_path)
     check_config(config_global, nn_model_factory)
 
-    df_train, df_test, df_val, categories = read_data(config_global["data"]["path"], val=True)
+    df_train, df_test, df_val, categories = read_data(**config_global["data"], val=True)
 
     for model_name, config in config_global['models'].items():
         if arguments.model is not None and arguments.model != model_name:
