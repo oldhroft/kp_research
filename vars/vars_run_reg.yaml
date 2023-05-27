@@ -1,0 +1,13 @@
+default: &default
+  pipe_name: LagDataPipe
+  pipe_params: !include common/common.yaml
+  data:
+    path: './data/All_browse_data_без_погружения_19971021_20230107_с_пропусками.csv'
+
+models:
+  lightgbm:
+    <<: *default
+    init_params:
+      n_jobs: -1
+      random_state: 17
+

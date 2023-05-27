@@ -5,11 +5,13 @@ def categorize(x):
     elif x <= 33: return 1
     else: return 2
 
-def preprocess_3h(df):
+def preprocess_3h(df, regression=False):
 
     x = df.copy()
-
-    x['category'] = x['Kp*10'].apply(categorize)
+    if not regression:
+        x['category'] = x['Kp*10'].apply(categorize)
+    else:
+        x["category"] = x["Kp*10"]
 
     x['dttm'] = x.apply(
         lambda y: datetime.datetime(

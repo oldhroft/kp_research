@@ -27,6 +27,9 @@ class ModelFactory(object):
 class SklearnModelFactory(ModelFactory):
     def get(self, key, **kwargs):
         return self._safe_get(key)().set_params(**kwargs)
+    
+class SklearnModelFactoryReg(SklearnModelFactory):
+    pass
 
 class KerasModelFactory(ModelFactory):
     pass
