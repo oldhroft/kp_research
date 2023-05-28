@@ -8,6 +8,8 @@ default: &default
     verbose: 1
   pipe_name:  LagDataPipe
   pipe_params: !include common/common.yaml
+  data:
+    path: './data/All_browse_data_без_погружения_19971021_20230107_с_пропусками.csv'
 
 # Variable definiton for ensemble tree models
 ensemble_grid: &ensemble_grid

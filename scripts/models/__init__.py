@@ -1,1 +1,7 @@
-from ._models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
+from ._models import (
+    sk_model_factory,
+    nn_model_factory,
+    cv_factory,
+    gcv_factory,
+    sk_model_factory_reg,
+)

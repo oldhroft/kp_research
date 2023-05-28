@@ -68,7 +68,7 @@ Recommended: Copy /vars/ folder to another location (etc. $HOME/folder/vars_init
 In $HOME/folder/vars_init/common/common.yaml
 
 ```yaml
-backward_steps: $(BACKWARD_STEPS)
+backward_steps: ${BACKWARD_STEPS)}
 forward_steps: 8
 random_state: 16
 scale: false
@@ -90,7 +90,7 @@ variables:
 ```
 Then run run.py with following commands
 ```shell
-python run.py --folder $HOME/folder --conf "BACKWARD_STEPS=3"
+python run.py --folder $HOME/folder --vars $HOME/folder/vars_init/common/common.yaml --conf "BACKWARD_STEPS=3"
 ```
 
 <!-- TODO -->

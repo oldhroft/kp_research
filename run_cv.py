@@ -25,7 +25,7 @@ if __name__ == '__main__':
     config_global = load_yaml(vars_path)
     check_config(config_global, sk_model_factory)
 
-    df_train, df_test, categories = read_data(arguments.data)
+    df_train, df_test, categories = read_data(**config_global["data"])
     logger.info(f'Data processing...')
     data_pipeline = get_data_pipeline(config_global["default"])
     X_train, y_train, features = data_pipeline.fit_transform(df_train)

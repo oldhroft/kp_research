@@ -11,6 +11,8 @@ default: &default
     average: macro
   seed: 16
   pipe_params: !include common/common_nn.yaml
+  data:
+    path: './data/All_browse_data_без_погружения_19971021_20230107_с_пропусками.csv'
 
 default_callback: &default_callback
   monitor: val_loss
