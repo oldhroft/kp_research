@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [tool.poetry]
 name = "kp-research"
 version = "0.1.0"
@@ -28,3 +29,27 @@ openpyxl = "^3.1.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+=======
+[project]
+name = "scripts"
+version = "0.0.1"
+description = "Project"
+requires-python = ">=3.7"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["scripts"] 
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+generate_report = "scripts.report.generate_report:generate_report"
+
+[tools.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.csv"]
+>>>>>>> origin/refactoring

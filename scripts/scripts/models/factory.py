@@ -1,26 +1,28 @@
+from typing import Dict, Callable
+
 class ModelFactory(object):
 
     def __init__(self) -> None:
-        self._builders = {}
+        self._builders: Dict[str, Callable] = {}
     
-    def register_builder(self, builder, key=None):
+    def register_builder(self, builder: Callable, key: str=None):
         if key is None:
             key = builder.__name__
         self._builders[key] = builder
     
-    def __contains__(self, item):
+    def __contains__(self, item: str):
         return item in self._builders
     
-    def _safe_get(self, key):
+    def _safe_get(self, key: str):
         if key in self:
             return self._builders[key]
         else:
             raise ValueError(f'No model named {key} registered')
     
-    def get(self, key, **kwargs):
+    def get(self, key: str, **kwargs):
         return self._safe_get(key)(**kwargs)
     
-    def get_builder(self, key):
+    def get_builder(self, key: str):
         return lambda **kwargs: self.get(key, **kwargs)
 
 

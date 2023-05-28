@@ -17,3 +17,6 @@ catboost_info
 .DS_Store
 TODO.md
 notebooks/Untitled.ipynb
+*egg-info
+.vscode
+.mypy_cache

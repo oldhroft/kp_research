@@ -55,15 +55,17 @@ def read_data(path, date_from=None, val=False, regression=False):
         return df_train, df_test, categories
 
 
+
 from importlib import import_module
 
 
-def get_data_pipeline(config):
+def get_data_pipeline(config: Dict[str, Any]) -> Any:
     cls = getattr(import_module("scripts.pipeline.data_pipe"), config["pipe_name"])
     return cls(**config["pipe_params"])
 
 
-def create_folder_structure(root: str) -> dict:
+def create_folder_structure(root: str) -> Dict[str, str]:
+
     os.environ["FOLDER"] = root
     structure = {"root": root}
     create_folder(root)
@@ -110,23 +112,24 @@ def grid_search(
     return gcv.best_params_, gcv.best_score_, results
 
 
-def fit(model_name, init_params, X_train, y_train):
+
+def fit(model_name: str, init_params: dict, X_train: Any, y_train: Any):
     model = sk_model_factory.get(model_name, **init_params)
     model = MultiOutputClassifier(model)
     model.fit(X_train, y_train)
     return model
 
 
-def fit_reg(model_name, init_params, X_train, y_train):
-    model = sk_model_factory_reg.get(model_name, **init_params)
-    model = MultiOutputRegressor(model)
-    model.fit(X_train, y_train)
-    return model
-
-
 def fit_keras(
-    model_name, init_params, fit_params, callback_params, X_train, y_train, seed
+    model_name: str,
+    init_params: dict,
+    fit_params: dict,
+    callback_params: dict,
+    X_train: Any,
+    y_train: Any,
+    seed: int,
 ):
+
     models = []
     histories = {}
 
@@ -144,7 +147,14 @@ def fit_keras(
     return models, histories
 
 
-def score(model, model_name, X_test, y_test, structure, proc_name):
+def score(
+    model: Any,
+    model_name: str,
+    X_test: Any,
+    y_test: Any,
+    structure: Dict[str, str],
+    proc_name: str,
+) -> None:
     preds = squeeze(model.predict(X_test))
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average="macro")
     fname = os.path.join(structure["root"], f"{proc_name}_{model_name}_f1.csv")
@@ -197,7 +207,7 @@ def score_keras(model, model_name, X_test, y_test, structure, proc_name):
 def save_cv_results(
     results: DataFrame,
     model_name: str,
-    structure: str,
+    structure: Dict[str, str],
     proc_name: str,
 ) -> None:
     filename = os.path.join(
@@ -207,9 +217,9 @@ def save_cv_results(
 
 
 def save_history(
-    history,
+    history: Any,
     model_name: str,
-    structure: str,
+    structure: Dict[str, str],
     proc_name: str,
 ) -> None:
     for col, item in history.items():
@@ -221,9 +231,9 @@ def save_history(
 
 
 def save_model(
-    model,
+    model: Any,
     model_name: str,
-    structure: str,
+    structure: Dict[Any, Any],
     proc_name: str,
 ):
     filename = os.path.join(
@@ -232,15 +242,17 @@ def save_model(
     joblib.dump(model, filename)
 
 
+
+
 def save_model_keras(
-    model,
+    model: Any,
     model_name: str,
-    structure: str,
+    structure: Dict[str, str],
     proc_name: str,
 ):
     for i, model_ in enumerate(model):
         filename = os.path.join(
-            structure["model_path"], f"{proc_name}_{model_name}_{i}_model.h5"
+            structure["model_path"], f"{proc_name}_{model_name}_{i}_model"
         )
         model_.save(filename)
 
@@ -258,7 +270,7 @@ def save_vars(config: dict, proc_name: str, model_name: str, structure: dict) ->
 from scripts.models.factory import ModelFactory
 
 
-def check_config(config: dict, factory: ModelFactory):
+def check_config(config: Dict[str, Any], factory: ModelFactory):
     length = 0
     not_in_factory = []
     for item in config["models"]:
