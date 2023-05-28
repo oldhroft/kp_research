@@ -1,8 +1,9 @@
 default: &default
   pipe_name: LagDataPipe
   pipe_params: !include common/common.yaml
-  data:
-    path: './data/All_browse_data_без_погружения_19971021_20230107_с_пропусками.csv'
+  
+data:
+  path: './data/All_browse_data_без_погружения_19971021_20230107_с_пропусками.csv'
 
 models:
   dummy:

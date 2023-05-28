@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "kp-research"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "scripts"}]
+
+[tool.poetry.dependencies]
+python = ">=3.10, <3.12"
+tensorflow-macos = "^2.12.0"
+pandas = "^2.0.1"
+matplotlib = "^3.7.1"
+scikit-learn = "^1.2.2"
+catboost = "^1.2"
+xgboost = "^1.7.5"
+tqdm = "^4.65.0"
+anybadge = "^1.14.0"
+imblearn = "^0.0"
+pyyaml = "^6.0"
+jupyter = "^1.0.0"
+pytest = "^7.3.1"
+pytest-cov = "^4.1.0"
+lightgbm = "^3.3.5"
+openpyxl = "^3.1.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
