@@ -1,4 +1,3 @@
-from tkinter import Grid
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
@@ -14,7 +13,13 @@ from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import make_pipeline as make_pipeline_imb
 
 from scripts.models.factory import register_model
-from scripts.models._models import sk_model_factory, nn_model_factory, cv_factory, gcv_factory
+from scripts.models._models import (
+    sk_model_factory,
+    nn_model_factory,
+    cv_factory,
+    gcv_factory,
+    sk_model_factory_reg
+)
 from scripts.helpers.utils import decorate_class
 
 
@@ -91,7 +96,6 @@ class KerasModels:
         units_array: list = [10],
         optimizer: str = "adam",
     ) -> Sequential:
-
         model = Sequential(
             [
                 L.Input(shape=input_shape),
@@ -110,7 +114,6 @@ class KerasModels:
         units_array,
         optimizer,
     ):
-
         model = Sequential(
             [
                 L.Input(shape=input_shape),
@@ -139,7 +142,6 @@ class KerasModels:
         units_array,
         optimizer,
     ):
-
         model = Sequential(
             [
                 L.Input(shape=input_shape),
@@ -168,7 +170,6 @@ class KerasModels:
         units_array,
         optimizer,
     ):
-
         model = Sequential(
             [
                 L.Input(shape=input_shape),
@@ -199,7 +200,6 @@ class KerasModels:
         units_array,
         optimizer,
     ):
-
         model = Sequential(
             [
                 L.Input(shape=input_shape),
@@ -248,9 +248,15 @@ class GCV:
         return GridSearchCV(**kwargs)
 
     def rscv(**kwargs):
-
         if "param_grid" in kwargs:
             kwargs["param_distributions"] = kwargs["param_grid"]
             kwargs.pop("param_grid")
 
         return RandomizedSearchCV(**kwargs)
+
+
+@decorate_class(staticmethod)
+@decorate_class(register_model(sk_model_factory_reg))
+class SkLearnModelsReg:
+    def lightgbm():
+        return LGBMRegressor()

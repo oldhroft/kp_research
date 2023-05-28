@@ -1,15 +1,19 @@
 import datetime
 
+
 def categorize(x):
-    if x <= 17: return 0
-    elif x <= 33: return 1
-    else: return 2
+    if x <= 17:
+        return 0
+    elif x <= 33:
+        return 1
+    else:
+        return 2
+
 
 def preprocess_3h(df, regression=False):
-
     x = df.copy()
     if not regression:
-        x['category'] = x['Kp*10'].apply(categorize)
+        x["category"] = x["Kp*10"].apply(categorize)
     else:
         x["category"] = x["Kp*10"]
 
@@ -26,6 +30,7 @@ def preprocess_3h(df, regression=False):
 
 from sklearn.preprocessing import StandardScaler
 from numpy import array
+from pandas import DataFrame
 
 
 def _select(df: DataFrame, columns: list) -> DataFrame:

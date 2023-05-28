@@ -57,7 +57,7 @@ def read_data(path, date_from=None, val=False, regression=False):
 
 
 from importlib import import_module
-
+from typing import Dict, Any
 
 def get_data_pipeline(config: Dict[str, Any]) -> Any:
     cls = getattr(import_module("scripts.pipeline.data_pipe"), config["pipe_name"])

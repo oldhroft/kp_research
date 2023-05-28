@@ -6,4 +6,4 @@ cv_factory = CVFactory()
 gcv_factory = GCVFactory()
 sk_model_factory_reg = SklearnModelFactoryReg()
 
-from .models import SkLearnModels, KerasModels, CV, SkLearnModelsReg
+from scripts.models.models import SkLearnModels, KerasModels, CV, SkLearnModelsReg
