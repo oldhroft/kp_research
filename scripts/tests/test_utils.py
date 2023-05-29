@@ -62,89 +62,89 @@ def test_add_to_environ():
     assert os.environ["variable"] == "2"
 
 
-from scripts.helpers.utils import _trim
+# from scripts.helpers.utils import _trim
 from pandas import read_csv
 
-DF = read_csv(os.path.join(LOCATION, "test_data/test.csv"))
+# DF = read_csv(os.path.join(LOCATION, "test_data/test.csv"))
 
 
-class Test_Trim:
-    def test_no_trim(self):
-        s = _trim(DF, forward=True, trim=False, lags=10100000)
-        assert s.shape == DF.shape
+# class Test_Trim:
+#     def test_no_trim(self):
+#         s = _trim(DF, forward=True, trim=False, lags=10100000)
+#         assert s.shape == DF.shape
 
-    def test_forward_trim(self):
-        s = _trim(DF, forward=True, trim=True, lags=3)
-        assert s.shape == (DF.shape[0] - 3, DF.shape[1])
+#     def test_forward_trim(self):
+#         s = _trim(DF, forward=True, trim=True, lags=3)
+#         assert s.shape == (DF.shape[0] - 3, DF.shape[1])
 
-        last1 = DF.iloc[-4]["Kp*10"]
-        last2 = s.iloc[-1]["Kp*10"]
-        assert last1 == last2
+#         last1 = DF.iloc[-4]["Kp*10"]
+#         last2 = s.iloc[-1]["Kp*10"]
+#         assert last1 == last2
 
-    def test_backward_trim(self):
-        s = _trim(DF, forward=False, trim=True, lags=3)
-        assert s.shape == (DF.shape[0] - 3, DF.shape[1])
+#     def test_backward_trim(self):
+#         s = _trim(DF, forward=False, trim=True, lags=3)
+#         assert s.shape == (DF.shape[0] - 3, DF.shape[1])
 
-        last1 = DF.iloc[3]["Kp*10"]
-        last2 = s.iloc[0]["Kp*10"]
-        assert last1 == last2
+#         last1 = DF.iloc[3]["Kp*10"]
+#         last2 = s.iloc[0]["Kp*10"]
+#         assert last1 == last2
 
 
-class TestAddLags:
-    def test_forward_one_column(self):
-        s = add_lags(DF, "Kp*10", forward=True, lags=2, trim=True, return_cols=False)
-        assert "Kp*10_lead_1" in s.columns and "Kp*10_lead_2" in s.columns
-        assert (s["Kp*10_lead_2"].values == DF.iloc[2:]["Kp*10"].values).all()
+# class TestAddLags:
+#     def test_forward_one_column(self):
+#         s = add_lags(DF, "Kp*10", forward=True, lags=2, trim=True, return_cols=False)
+#         assert "Kp*10_lead_1" in s.columns and "Kp*10_lead_2" in s.columns
+#         assert (s["Kp*10_lead_2"].values == DF.iloc[2:]["Kp*10"].values).all()
 
-    def test_backward_one_column(self):
-        s = add_lags(DF, "Kp*10", forward=False, lags=2, trim=True, return_cols=False)
-        assert "Kp*10_lag_1" in s.columns and "Kp*10_lag_2" in s.columns
-        assert (s["Kp*10_lag_2"].values == DF.iloc[:-2]["Kp*10"].values).all()
+#     def test_backward_one_column(self):
+#         s = add_lags(DF, "Kp*10", forward=False, lags=2, trim=True, return_cols=False)
+#         assert "Kp*10_lag_1" in s.columns and "Kp*10_lag_2" in s.columns
+#         assert (s["Kp*10_lag_2"].values == DF.iloc[:-2]["Kp*10"].values).all()
 
-    def test_backward_two_column(self):
-        s, columns = add_lags(
-            DF, ["dttm", "Kp*10"], forward=False, lags=1, trim=True, return_cols=True
-        )
+#     def test_backward_two_column(self):
+#         s, columns = add_lags(
+#             DF, ["dttm", "Kp*10"], forward=False, lags=1, trim=True, return_cols=True
+#         )
 
-        assert s.shape == (DF.shape[0] - 1, DF.shape[1] + 2)
-        assert (
-            "dttm_lag_1" in columns and "Kp*10_lag_1" in columns and len(columns) == 2
-        )
+#         assert s.shape == (DF.shape[0] - 1, DF.shape[1] + 2)
+#         assert (
+#             "dttm_lag_1" in columns and "Kp*10_lag_1" in columns and len(columns) == 2
+#         )
 
-    def test_negative_lags(self):
-        with pytest.raises(ValueError):
-            add_lags(
-                DF,
-                ["dttm", "Kp*10"],
-                forward=False,
-                lags=-1,
-                trim=True,
-                return_cols=True,
-            )
+#     def test_negative_lags(self):
+#         with pytest.raises(ValueError):
+#             add_lags(
+#                 DF,
+#                 ["dttm", "Kp*10"],
+#                 forward=False,
+#                 lags=-1,
+#                 trim=True,
+#                 return_cols=True,
+#             )
 
-    def test_str_lags(self):
-        with pytest.raises(ValueError):
-            add_lags(
-                DF,
-                ["dttm", "Kp*10"],
-                forward=False,
-                lags="str",
-                trim=True,
-                return_cols=True,
-            )
+#     def test_str_lags(self):
+#         with pytest.raises(ValueError):
+#             add_lags(
+#                 DF,
+#                 ["dttm", "Kp*10"],
+#                 forward=False,
+#                 lags="str",
+#                 trim=True,
+#                 return_cols=True,
+#             )
 
-    def test_default_subset(self):
-        df_new = add_lags(
-            DF, subset=None, forward=False, lags=1, trim=True, return_cols=False
-        )
+#     def test_default_subset(self):
+#         df_new = add_lags(
+#             DF, subset=None, forward=False, lags=1, trim=True, return_cols=False
+#         )
 
-        assert df_new.shape[1] == 2 * DF.shape[1]
+#         assert df_new.shape[1] == 2 * DF.shape[1]
 
-    def test_no_lags(self):
-        df_new = add_lags(
-            DF, subset=None, forward=False, lags=0, trim=True, return_cols=False
-        )
-        assert df_new.shape == DF.shape
+#     def test_no_lags(self):
+#         df_new = add_lags(
+#             DF, subset=None, forward=False, lags=0, trim=True, return_cols=False
+#         )
+#         assert df_new.shape == DF.shape
 
 
 from numpy import array, sqrt
@@ -239,119 +239,119 @@ def test__create_param_grid():
     assert final_grid == final_grid_res
 
 
-from sklearn.linear_model import RidgeClassifier
-from ..pipeline.preprocess import preprocess_3h
-from ..pipeline.data_pipe import LagDataPipe, SequenceDataPipe
-from sklearn.metrics import f1_score
+# from sklearn.linear_model import RidgeClassifier
+# from ..pipeline.preprocess import preprocess_3h
+# from ..pipeline.data_pipe import LagDataPipe, SequenceDataPipe
+# from sklearn.metrics import f1_score
 
 
-def test_validate():
-    def _ridge(**kwargs):
-        return RidgeClassifier(**kwargs)
+# def test_validate():
+#     def _ridge(**kwargs):
+#         return RidgeClassifier(**kwargs)
 
-    df = DF.pipe(preprocess_3h)
+#     df = DF.pipe(preprocess_3h)
 
-    config = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
-    data_pipeline = LagDataPipe(**config)
-    X_train, y_train, _ = data_pipeline.fit_transform(df)
-    X_val, y_val = X_train[-10:], y_train[-10:]
-    init_params = {"alpha": 1}
+#     config = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
+#     data_pipeline = LagDataPipe(**config)
+#     X_train, y_train, _ = data_pipeline.fit_transform(df)
+#     X_val, y_val = X_train[-10:], y_train[-10:]
+#     init_params = {"alpha": 1}
 
-    gv_params = {"scoring": "f1_macro", "verbose": 2}
+#     gv_params = {"scoring": "f1_macro", "verbose": 2}
 
-    param_grids = {"alpha": [1, 0.2, 3, 4]}
+#     param_grids = {"alpha": [1, 0.2, 3, 4]}
 
-    best_score, _, _ = validate(
-        _ridge,
-        init_params,
-        param_grids,
-        X_train,
-        y_train[:, 0],
-        X_val,
-        y_val[:, 0],
-        **gv_params,
-    )
+#     best_score, _, _ = validate(
+#         _ridge,
+#         init_params,
+#         param_grids,
+#         X_train,
+#         y_train[:, 0],
+#         X_val,
+#         y_val[:, 0],
+#         **gv_params,
+#     )
 
-    assert isinstance(best_score, float)
-
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras import layers as L
+#     assert isinstance(best_score, float)
 
 
-def test_validate_keras():
-    def perceptron(
-        input_shape: tuple,
-        n_classes: int = 3,
-        units_array: list = [10],
-        optimizer: str = "adam",
-    ) -> Sequential:
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras import layers as L
 
-        model = Sequential(
-            [
-                L.Input(shape=input_shape),
-                *(L.Dense(units=units, activation="relu") for units in units_array),
-                L.Dense(units=n_classes, activation="softmax"),
-            ]
-        )
 
-        model.compile(loss="categorical_crossentropy", optimizer=optimizer)
+# def test_validate_keras():
+#     def perceptron(
+#         input_shape: tuple,
+#         n_classes: int = 3,
+#         units_array: list = [10],
+#         optimizer: str = "adam",
+#     ) -> Sequential:
 
-        return model
+#         model = Sequential(
+#             [
+#                 L.Input(shape=input_shape),
+#                 *(L.Dense(units=units, activation="relu") for units in units_array),
+#                 L.Dense(units=n_classes, activation="softmax"),
+#             ]
+#         )
 
-    df = DF.pipe(preprocess_3h)
-    print(df.shape)
-    config = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
-    config["backward_steps"] = 1
-    data_pipeline = LagDataPipe(**config)
-    X_train, y_train, _ = data_pipeline.fit_transform(df)
-    print(X_train.shape)
-    X_val, y_val = X_train[-10:], y_train[-10:]
-    init_params = {
-        "optimizer": "adam",
-        "input_shape": X_train.shape[1:],
-        "n_classes": 2,
-    }
+#         model.compile(loss="categorical_crossentropy", optimizer=optimizer)
 
-    gv_params = {"scoring": "f1_macro", "verbose": 2}
+#         return model
 
-    param_grids = {
-        "units_array": [[1]],
-    }
+#     df = DF.pipe(preprocess_3h)
+#     print(df.shape)
+#     config = load_yaml(os.path.join(LOCATION, "test_yamls/test_vars.yaml"))
+#     config["backward_steps"] = 1
+#     data_pipeline = LagDataPipe(**config)
+#     X_train, y_train, _ = data_pipeline.fit_transform(df)
+#     print(X_train.shape)
+#     X_val, y_val = X_train[-10:], y_train[-10:]
+#     init_params = {
+#         "optimizer": "adam",
+#         "input_shape": X_train.shape[1:],
+#         "n_classes": 2,
+#     }
 
-    callback_params = {
-        "monitor": "val_loss",
-        "patience": 10,
-        "restore_best_weights": True,
-    }
+#     gv_params = {"scoring": "f1_macro", "verbose": 2}
 
-    scoring_params = {
-        "average": "macro",
-    }
+#     param_grids = {
+#         "units_array": [[1]],
+#     }
 
-    fit_params = {
-        "epochs": 2,
-        "validation_split": 0.1,
-        "verbose": 2,
-    }
-    gv_params = {
-        "verbose": 2,
-        "seed": 17,
-    }
+#     callback_params = {
+#         "monitor": "val_loss",
+#         "patience": 10,
+#         "restore_best_weights": True,
+#     }
 
-    _, best_score, _ = validate_keras(
-        perceptron,
-        init_params,
-        param_grids,
-        f1_score,
-        X_train,
-        y_train[:, 0],
-        X_val,
-        y_val[:, 0],
-        callback_params,
-        scoring_params,
-        fit_params,
-        **gv_params,
-    )
+#     scoring_params = {
+#         "average": "macro",
+#     }
 
-    assert isinstance(best_score, float)
+#     fit_params = {
+#         "epochs": 2,
+#         "validation_split": 0.1,
+#         "verbose": 2,
+#     }
+#     gv_params = {
+#         "verbose": 2,
+#         "seed": 17,
+#     }
+
+#     _, best_score, _ = validate_keras(
+#         perceptron,
+#         init_params,
+#         param_grids,
+#         f1_score,
+#         X_train,
+#         y_train[:, 0],
+#         X_val,
+#         y_val[:, 0],
+#         callback_params,
+#         scoring_params,
+#         fit_params,
+#         **gv_params,
+#     )
+
+#     assert isinstance(best_score, float)

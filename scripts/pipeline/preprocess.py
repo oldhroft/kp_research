@@ -1,13 +1,11 @@
 import datetime
 
 
-def categorize(x):
-    if x <= 17:
-        return 0
-    elif x <= 33:
-        return 1
-    else:
-        return 2
+def categorize(x, categories):
+    for i, border in enumerate(categories):
+        if x <= border:
+            return i
+    return i + 1
 
 
 def preprocess_3h(df, regression=False):
