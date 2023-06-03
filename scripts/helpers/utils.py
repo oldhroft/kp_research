@@ -1,6 +1,7 @@
 import os
 from typing import Any, List, Dict, Callable
 
+
 def create_folder(name: str) -> None:
     if not os.path.exists(name):
         os.mkdir(name)
@@ -14,7 +15,6 @@ def add_to_environ(data: List[str]) -> None:
 
 def decorate_class(decorator: Callable) -> Callable:
     def _decorate_class(cls: type):
-
         method_list = [
             func
             for func in dir(cls)
@@ -29,7 +29,7 @@ def decorate_class(decorator: Callable) -> Callable:
     return _decorate_class
 
 
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, Index
 
 
 def _trim(df: DataFrame, forward: bool, trim: bool, lags: int) -> DataFrame:
@@ -50,7 +50,6 @@ def add_lags(
     suffix_name: str = None,
     return_cols=False,
 ) -> DataFrame:
-
     if suffix_name is None:
         suffix_name = "lead" if forward else "lag"
 
@@ -65,7 +64,10 @@ def add_lags(
     elif lags < 0:
         raise ValueError(f"Lags should be non-negative")
     elif lags == 0:
-        return x
+        if return_cols:
+            return x, []
+        else:
+            return x
     elif subset is None:
         for i in range(1, lags + 1):
             lag = -i if forward else i
@@ -104,18 +106,46 @@ def add_lags(
         return _trim(x, forward, trim, lags)
 
 
+def rolling_agg(
+    data: DataFrame,
+    windows: List[int],
+    functions: List[str],
+    subset: List[str],
+    return_features=True,
+) -> DataFrame:
+    data = data.copy()
+    features = []
+    index_subset = Index(subset)
+    for window in windows:
+        for function in functions:
+            suffix = f"_rolling_{window}_{function}"
+            features.extend(list(index_subset + suffix))
+            if function.startswith("quantile"):
+                qnt = int(function.split("_")[1]) / 100
+                agg = data[subset].rolling(window, min_periods=0).quantile(qnt).fillna(0)
+            else:
+                agg = data[subset].rolling(window, min_periods=0).agg(function).fillna(0)
+
+            data = data.join(agg.add_suffix(suffix))
+
+    if return_features:
+        return data, features
+    else:
+        return data
+
+
 from sklearn.metrics import confusion_matrix
 
 
 def columnwise_score(
     scoring_func: Callable, preds_df: DataFrame, true_df: DataFrame, **kwargs
 ) -> Series:
-
     score = Series(dtype="float64")
     preds_df = DataFrame(preds_df)
     true_df = DataFrame(true_df)
-    for (column_pred, y_pred), (columns_true, y_true) in zip(preds_df.items(), 
-                                                             true_df.items()):
+    for (column_pred, y_pred), (columns_true, y_true) in zip(
+        preds_df.items(), true_df.items()
+    ):
         score.loc[column_pred] = scoring_func(y_true, y_pred, **kwargs)
 
     return score
@@ -124,14 +154,13 @@ def columnwise_score(
 def columnwise_confusion_matrix(
     preds_df: DataFrame, y_true_df: DataFrame, categories: list
 ) -> Dict[Any, Any]:
-
     preds_df = DataFrame(preds_df)
     y_true_df = DataFrame(y_true_df)
 
     all_matrices = {}
-    for (column_pred, y_pred), (columns_true, y_true) in zip(preds_df.items(), 
-                                                             y_true_df.items()):
-
+    for (column_pred, y_pred), (columns_true, y_true) in zip(
+        preds_df.items(), y_true_df.items()
+    ):
         matrix = DataFrame(
             confusion_matrix(y_true, y_pred), index=categories, columns=categories
         )
@@ -161,7 +190,6 @@ def validate(
     scoring: str,
     verbose: int = 1,
 ) -> tuple:
-
     best_score = 0
     best_param = None
 
@@ -169,7 +197,6 @@ def validate(
     results = []
 
     for param in _create_param_grid(params):
-
         start_time = time.time()
         full_params = init_params.copy()
         full_params.update(param)
@@ -294,14 +321,12 @@ def validate_keras(
     verbose: bool,
     seed: int,
 ) -> tuple:
-
     best_score = 0
     best_param = None
 
     results = []
 
     for param in _create_param_grid(params):
-
         start_time = time.time()
         if seed is not None:
             set_seed(seed)

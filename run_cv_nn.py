@@ -7,14 +7,18 @@ from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 from scripts.models import nn_model_factory, cv_factory
 
-from run_utils import fit_keras, get_data_pipeline, save_history, score_keras, read_data
-from run_utils import create_folder_structure, get_data_pipeline
+from run_utils import (
+    fit_keras,
+    save_history,
+    score_keras,
+    build_data_pipelines,
+)
+from run_utils import create_folder_structure
 from run_utils import save_vars, save_cv_results, save_model_keras, check_config
 
 PROC_NAME = os.path.basename(__file__).split(".")[0]
 
 if __name__ == "__main__":
-
     arguments = create_argparser().parse_args()
     structure = create_folder_structure(arguments.folder)
     add_to_environ(arguments.conf)
@@ -29,24 +33,27 @@ if __name__ == "__main__":
     config_global = load_yaml(vars_path)
     check_config(config_global, nn_model_factory)
 
-    df_train, df_test, categories = read_data(**config_global["data"])
-    
-    for model_name, config in config_global['models'].items():
+    data_pipelines = build_data_pipelines(
+        config_global["models"], structure
+    )
 
+    for model_name, config in config_global["models"].items():
         if arguments.model is not None and arguments.model != model_name:
             continue
+
+        pipe = data_pipelines[config["pipe_name"]]
+        X_train, y_train, X_test, y_test = pipe.get_xy()
 
         logger.info(f"Model {model_name}, params:")
         logger.info(dict_to_yaml_str(config))
         config["best_params"] = {}
 
-        logger.info(f"Data processing for {model_name}")
-        data_pipeline = get_data_pipeline(config)
-        X_train, y_train, features = data_pipeline.fit_transform(df_train)
-        X_test, y_test, features = data_pipeline.transform(df_test)
+        pipe = data_pipelines[config["pipe_name"]]
+        X_train, y_train, X_test, y_test = pipe.get_xy()
+
         logger.info(f"X_train shape {X_train.shape}")
         logger.info(f"X_test shape {X_test.shape}")
-        config["features"] = list(features)
+        config["features"] = list(pipe.features)
 
         shape = X_train.shape[1:]
 
@@ -54,7 +61,7 @@ if __name__ == "__main__":
         model_fn = nn_model_factory.get_builder(model_name)
         init_params = config["init_params"].copy()
         init_params["input_shape"] = shape
-        init_params["n_classes"] = len(categories)
+        init_params["n_classes"] = len(pipe.categories)
         cv = cv_factory.get(config["cv"], **config["cv_params"])
         best_params, best_score, results = validate_keras_cv(
             model_fn,

@@ -58,7 +58,7 @@ def get_feature_importances_multi_output(model: Any, features: list) -> DataFram
 def concat_save(folder: str, output_path: str, format: str = "csv") -> None:
     def read_file(fname: str) -> DataFrame:
         name = basename(fname)
-        return read_csv(fname, index_col=0, squeeze=True).rename(name).to_frame()
+        return read_csv(fname, index_col=0,).iloc[:, 0].rename(name).to_frame()
 
     format = f"*.{format}"
     files = glob.glob(os.path.join(folder, format))
@@ -98,3 +98,6 @@ def generate_report():
         importances_folder = os.path.join(report_path, "feature_importances")
         create_folder(importances_folder)
         extract_fi_from_models(folder, importances_folder)
+
+if __name__ == "__main__":
+    generate_report()

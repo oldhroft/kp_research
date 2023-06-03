@@ -1,6 +1,6 @@
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
-from lightgbm import LGBMClassifier
+from lightgbm import LGBMClassifier, LGBMRegressor
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import RidgeClassifier, LogisticRegression
 from sklearn.pipeline import make_pipeline

@@ -2,7 +2,8 @@ import logging
 import os
 
 from run_utils import (create_folder_structure, fit, get_data_pipeline,
-                       read_data, save_model, save_vars, score, check_config)
+                       read_data, save_model, save_vars, score, check_config,
+                       build_data_pipelines)
 from scripts.helpers.logging_utils import config_logger, create_argparser
 from scripts.helpers.utils import add_to_environ
 from scripts.helpers.yaml_utils import dict_to_yaml_str, load_yaml
@@ -25,26 +26,28 @@ if __name__ == '__main__':
     config_global = load_yaml(vars_path)
     check_config(config_global, sk_model_factory)
 
-    df_train, df_test, categories = read_data(**config_global["data"])
 
     logger.info(f'Data processing...')
-    data_pipeline = get_data_pipeline(config_global["default"])
-    
-    X_train, y_train, features = data_pipeline.fit_transform(df_train)
-    X_test, y_test, features = data_pipeline.transform(df_test)
-    
-    logger.info(f'X_train shape {X_train.shape}')
-    logger.info(f'X_test shape {X_test.shape}')
 
+    data_pipelines = build_data_pipelines(
+        config_global["models"], structure
+    )
+    
     for model_name, config in config_global['models'].items():
 
         if arguments.model is not None and arguments.model != model_name:
             continue
+        
+        pipe = data_pipelines[config["pipe_name"]]
+        X_train, y_train, X_test, y_test = pipe.get_xy()
+       
 
         logger.info('\n' + '=' * 60 + '\n')
         logger.info(f'Model {model_name}, params:')
         logger.info(dict_to_yaml_str(config))
-        config['features'] = list(features)
+        logger.info(f'X_train shape {X_train.shape}')
+        logger.info(f'X_test shape {X_test.shape}')
+        config['features'] = list(pipe.features)
         config['best_params'] = {}
 
         logger.info(f'Fitting model, {model_name}')

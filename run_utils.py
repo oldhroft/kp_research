@@ -55,21 +55,34 @@ def read_data(path, date_from=None, val=False, regression=False):
         return df_train, df_test, categories
 
 
-
 from importlib import import_module
-from typing import Dict, Any
+from typing import Dict, Any, List
+
 
 def get_data_pipeline(config: Dict[str, Any]) -> Any:
     cls = getattr(import_module("scripts.pipeline.data_pipe"), config["pipe_name"])
     return cls(**config["pipe_params"])
 
 
-def create_folder_structure(root: str) -> Dict[str, str]:
+def build_data_pipelines(config: dict, structure: dict):
+    pipes = {}
 
+    for model_name, cfg in config.items():
+        cfg_cp = cfg.copy()
+        cfg_cp["pipe_params"]["out_folder"] = structure["data_path"]
+        pipe = get_data_pipeline(cfg_cp)
+        pipe.load()
+
+        pipes[pipe.name] = pipe
+
+    return pipes
+
+
+def create_folder_structure(root: str) -> Dict[str, str]:
     os.environ["FOLDER"] = root
     structure = {"root": root}
     create_folder(root)
-    for sub_folder in ["matrix", "model", "history", "vars", "cv_results"]:
+    for sub_folder in ["matrix", "model", "history", "vars", "cv_results", "data"]:
         path = os.path.join(root, sub_folder)
         create_folder(path)
         structure[f"{sub_folder}_path"] = path
@@ -112,10 +125,16 @@ def grid_search(
     return gcv.best_params_, gcv.best_score_, results
 
 
-
 def fit(model_name: str, init_params: dict, X_train: Any, y_train: Any):
     model = sk_model_factory.get(model_name, **init_params)
     model = MultiOutputClassifier(model)
+    model.fit(X_train, y_train)
+    return model
+
+
+def fit_reg(model_name: str, init_params: dict, X_train: Any, y_train: Any):
+    model = sk_model_factory_reg.get(model_name, **init_params)
+    model = MultiOutputRegressor(model)
     model.fit(X_train, y_train)
     return model
 
@@ -129,7 +148,6 @@ def fit_keras(
     y_train: Any,
     seed: int,
 ):
-
     models = []
     histories = {}
 
@@ -167,11 +185,15 @@ def score(
             )
         )
 
+
 from scripts.pipeline.preprocess import categorize
 
-def score_reg(model, model_name, X_test, y_test, structure, proc_name):
+
+def score_reg(
+    model, model_name, X_test, y_test, structure, proc_name, borders: List[int]
+):
     preds = squeeze(model.predict(X_test))
-    vectorized = vectorize(categorize)
+    vectorized = vectorize(lambda x: (categorize(x, borders)))
     preds_cat = vectorized(preds)
     y_test_cat = vectorized(y_test)
     f1_macro_res = columnwise_score(f1_score, preds_cat, y_test_cat, average="macro")
@@ -192,6 +214,7 @@ def score_keras(model, model_name, X_test, y_test, structure, proc_name):
     for i in range(y_test.shape[1]):
         preds[i] = model[i].predict(X_test, verbose=0).argmax(axis=1)
     preds = DataFrame(preds)
+    print(preds.shape)
     f1_macro_res = columnwise_score(f1_score, preds, y_test, average="macro")
     fname = os.path.join(structure["root"], f"{proc_name}_{model_name}_f1.csv")
     f1_macro_res.to_csv(fname)
@@ -242,8 +265,6 @@ def save_model(
     joblib.dump(model, filename)
 
 
-
-
 def save_model_keras(
     model: Any,
     model_name: str,
@@ -252,7 +273,7 @@ def save_model_keras(
 ):
     for i, model_ in enumerate(model):
         filename = os.path.join(
-            structure["model_path"], f"{proc_name}_{model_name}_{i}_model"
+            structure["model_path"], f"{proc_name}_{model_name}_{i}_model.h5"
         )
         model_.save(filename)
 

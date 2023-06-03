@@ -1,9 +1,6 @@
 default: &default
-  pipe_name: LagDataPipe
+  pipe_name: LagDataPipe3HFeatures
   pipe_params: !include common/common.yaml
-  
-data:
-  path: './data/All_browse_data_без_погружения_19971021_20230107_с_пропусками.csv'
 
 models:
   dummy:
@@ -38,7 +35,7 @@ models:
     <<: *default
     init_params:
       random_state: 17
-      n_estimators: 10
+      n_estimators: 1000
       train_dir: ${FOLDER}/catboost_info
 
   lightgbm:

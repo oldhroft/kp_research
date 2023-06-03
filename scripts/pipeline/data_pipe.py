@@ -16,8 +16,8 @@ def read_data(path):
 
 def split_data(data: DataFrame, year_test: int = 2020) -> Tuple[DataFrame]:
     return (
-        data.loc[data.year >= year_test].reset_index(drop=True),
         data.loc[data.year < year_test].reset_index(drop=True),
+        data.loc[data.year >= year_test].reset_index(drop=True),
     )
 
 
@@ -34,7 +34,7 @@ class DataPipe:
         out_folder: str,
         date_from: str = None,
         year_test: int = 2020,
-        categories: List[int] = DEFAULT_BORDERS,
+        borders: List[int] = DEFAULT_BORDERS,
     ) -> None:
         self.path = path
         self.out_folder = out_folder
@@ -42,7 +42,9 @@ class DataPipe:
         self.features = []
         self.targets = []
         self.year_test = year_test
-        self.categories = categories
+        self.borders = borders
+
+        self.name = self.__class__.__name__
 
     def extract(
         self,
@@ -64,8 +66,10 @@ class DataPipe:
         )
 
         self.data["category"] = self.data["Kp*10"].apply(
-            categorize, categories=self.categories
+            categorize, categories=self.borders
         )
+
+        self.categories = self.data.category.unique().tolist()
 
     def load(self) -> None:
         self.extract()
@@ -74,11 +78,9 @@ class DataPipe:
         self.data_train, self.data_test = split_data(self.data, self.year_test)
 
         self.out_path_train = os.path.join(
-            self.out_folder, f"{self.__class__.__name__}_train.parquet"
+            self.out_folder, f"{self.name}_train.parquet"
         )
-        self.out_path_test = os.path.join(
-            self.out_folder, f"{self.__class__.__name__}_test.parquet"
-        )
+        self.out_path_test = os.path.join(self.out_folder, f"{self.name}_test.parquet")
 
         self.data_train.to_parquet(self.out_path_train)
         self.data_test.to_parquet(self.out_path_test)
@@ -91,13 +93,13 @@ class DataPipe3H(DataPipe):
         out_folder: str,
         date_from: str = None,
         year_test: int = 2020,
-        categories: List[int] = DEFAULT_BORDERS,
+        borders: List[int] = DEFAULT_BORDERS,
     ) -> None:
-        super().__init__(path, out_folder, date_from, year_test, categories)
+        super().__init__(path, out_folder, date_from, year_test, borders)
 
     def transform(self) -> None:
         super().transform()
-        self.data = self.data.sort_values(by="dttm").iloc[::3].bfill()
+        self.data = self.data.sort_values(by="dttm").iloc[2::3].bfill()
 
 
 class LagDataPipe3H(DataPipe3H):
@@ -114,9 +116,9 @@ class LagDataPipe3H(DataPipe3H):
         random_state: Union[int, None] = None,
         date_from: str = None,
         year_test: int = 2020,
-        categories: List[int] = DEFAULT_BORDERS,
+        borders: List[int] = DEFAULT_BORDERS,
     ) -> None:
-        super().__init__(path, out_folder, date_from, year_test, categories)
+        super().__init__(path, out_folder, date_from, year_test, borders)
 
         self.variables = variables
         self.target = target
@@ -128,6 +130,8 @@ class LagDataPipe3H(DataPipe3H):
 
     def transform(self) -> None:
         super().transform()
+
+        self.features = self.variables.copy()
 
         self.data, features = add_lags(
             self.data,
@@ -141,13 +145,13 @@ class LagDataPipe3H(DataPipe3H):
         self.data, targets = add_lags(
             self.data,
             lags=self.forward_steps,
-            forward=False,
+            forward=True,
             trim=True,
             subset=self.target,
             return_cols=True,
         )
 
-        self.features = features
+        self.features.extend(features)
         self.targets = targets
 
     def get_xy(self) -> Tuple[ndarray]:
@@ -184,7 +188,7 @@ class SequenceDataPipe3H(LagDataPipe3H):
         random_state: int | None = None,
         date_from: str = None,
         year_test: int = 2020,
-        categories: List[int] = DEFAULT_BORDERS,
+        borders: List[int] = DEFAULT_BORDERS,
     ) -> None:
         super().__init__(
             path,
@@ -198,18 +202,126 @@ class SequenceDataPipe3H(LagDataPipe3H):
             random_state,
             date_from,
             year_test,
-            categories,
+            borders,
         )
 
     def get_xy(self) -> Tuple[ndarray]:
         X_train, y_train, X_test, y_test = super().get_xy()
 
         return (
-            X_train.reshape(-1, self.forward_steps, len(self.features)),
+            X_train.reshape(-1, self.forward_steps + 1, len(self.variables)),
             y_train,
-            X_test.reshape(-1, self.forward_steps, len(self.features)),
+            X_test.reshape(-1, self.forward_steps + 1, len(self.variables)),
             y_test,
         )
+
+
+from scripts.helpers.utils import rolling_agg
+
+from numpy import sign
+from numpy import abs as np_abs
+
+
+class LagDataPipe3HFeatures(LagDataPipe3H):
+    def __init__(
+        self,
+        path: str,
+        out_folder: str,
+        variables: list,
+        target: Any,
+        backward_steps: int,
+        forward_steps: int,
+        feature_variables: list,
+        windows: list,
+        functions: list,
+        use_diff: bool,
+        use_ewm: bool,
+        use_diff_sc: bool,
+        ewm_halfspan: int = 100,
+        scale: bool = False,
+        shuffle: bool = True,
+        random_state: int | None = None,
+        date_from: str = None,
+        year_test: int = 2020,
+        borders: List[int] = DEFAULT_BORDERS,
+    ) -> None:
+        super().__init__(
+            path,
+            out_folder,
+            variables,
+            target,
+            backward_steps,
+            forward_steps,
+            scale,
+            shuffle,
+            random_state,
+            date_from,
+            year_test,
+            borders,
+        )
+
+        self.feature_variables = feature_variables
+        self.windows = windows
+        self.functions = functions
+        self.use_diff = use_diff
+        self.use_ewm = use_ewm
+        self.use_diff_sc = use_diff_sc
+        self.ewm_halfspan = ewm_halfspan
+
+    def transform(self) -> None:
+        super().transform()
+
+        self.data, features = rolling_agg(
+            self.data, self.windows, self.functions, self.feature_variables
+        )
+
+        if self.use_diff:
+            diff = (
+                self.data[self.feature_variables].diff().fillna(0).add_suffix("_diff")
+            )
+            diff_agg, features = rolling_agg(
+                diff, self.windows, self.functions, diff.columns
+            )
+            self.data = self.data.join(diff_agg.drop(diff.columns, axis=1))
+            self.features.extend(features)
+
+        if self.use_diff_sc:
+            diff = (
+                self.data[self.feature_variables].diff().fillna(0).add_suffix("_diff")
+            )
+            sign_change = (
+                (diff.apply(sign).diff().apply(np_abs) > 0)
+                .astype("int64")
+                .add_suffix("_sc")
+            )
+
+            sign_change_agg, features = rolling_agg(
+                sign_change, self.windows, ["mean"], sign_change.columns
+            )
+            self.data = self.data.join(
+                sign_change_agg.drop(sign_change.columns, axis=1)
+            )
+
+            self.features.extend(features)
+
+        if self.use_ewm and self.use_diff:
+            diff = (
+                self.data[self.feature_variables].diff().fillna(0).add_suffix("_diff")
+            )
+            ewm = diff.ewm(self.ewm_halfspan).mean().add_suffix("_ewm_mean").fillna(0)
+            self.data = self.data.join(ewm)
+            self.features.extend(ewm.columns.tolist())
+
+        if self.use_ewm:
+            ewm = (
+                self.data[self.variables]
+                .ewm(self.ewm_halfspan)
+                .mean()
+                .add_suffix("_ewm_mean")
+                .fillna(0)
+            )
+            self.data = self.data.join(ewm)
+            self.features.extend(ewm.columns.tolist())
 
 
 # class DataPipe(object):

@@ -6,13 +6,18 @@ from scripts.helpers.yaml_utils import load_yaml, dict_to_yaml_str
 from scripts.helpers.utils import add_to_environ
 from scripts.models import nn_model_factory
 
-from run_utils import fit_keras, get_data_pipeline, save_history, read_data, score_keras
-from run_utils import create_folder_structure, save_model_keras, save_vars, check_config
+from run_utils import fit_keras, save_history, score_keras
+from run_utils import (
+    create_folder_structure,
+    save_model_keras,
+    save_vars,
+    check_config,
+    build_data_pipelines,
+)
 
 PROC_NAME = os.path.basename(__file__).split(".")[0]
 
 if __name__ == "__main__":
-
     arguments = create_argparser().parse_args()
     structure = create_folder_structure(arguments.folder)
     add_to_environ(arguments.conf)
@@ -26,23 +31,27 @@ if __name__ == "__main__":
     )
     config_global = load_yaml(vars_path)
     check_config(config_global, nn_model_factory)
-        
-    df_train, df_test, categories = read_data(**config_global["data"])
+
+    data_pipelines = build_data_pipelines(
+        config_global["models"], structure
+    )
 
     for model_name, config in config_global["models"].items():
 
         if arguments.model is not None and arguments.model != model_name:
             continue
+        
+        pipe = data_pipelines[config["pipe_name"]]
+        X_train, y_train, X_test, y_test = pipe.get_xy()
 
         logger.info(f"Model {model_name}, params:")
         logger.info(dict_to_yaml_str(config))
         config["best_params"] = {}
 
-        logger.info(f"Data processing for mode {model_name}.")
-        data_pipeline = get_data_pipeline(config)
-        X_train, y_train, features = data_pipeline.fit_transform(df_train)
-        X_test, y_test, features = data_pipeline.transform(df_test)
-        config["features"] = list(features)
+        logger.info(f'X_train shape {X_train.shape}')
+        logger.info(f'X_test shape {X_test.shape}')
+        config['features'] = list(pipe.features)
+
         logger.info(f"X_train shape {X_train.shape}")
         logger.info(f"X_test shape {X_test.shape}")
 
@@ -51,7 +60,7 @@ if __name__ == "__main__":
 
         init_params = config["init_params"].copy()
         init_params["input_shape"] = shape
-        init_params["n_classes"] = len(categories)
+        init_params["n_classes"] = len(pipe.categories)
         model, history = fit_keras(
             model_name,
             init_params,
